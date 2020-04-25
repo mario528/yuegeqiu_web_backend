@@ -17,6 +17,6 @@ app.use('/api/docs', express.static('public/swagger'))
 
 routeDecorate(app)
 
-const server = app.listen(3000, () => {
+app.listen(3000, () => {
     console.log("Now Node.js server is running")
 })
