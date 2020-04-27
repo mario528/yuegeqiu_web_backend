@@ -90,6 +90,35 @@ class User {
         })
         res.end()
     }
+    async completeUserInfo (req, res) {
+        let {
+            location,
+            nick_name,
+            sex,
+            user_id
+        } = req.body
+        if (nick_name == '' || sex == -1 || !user_id || !location) {
+            ErrorHandler.handleParamsError(res)
+            return
+        }
+        let encode_user_id = AccountUtils.decodeUserId(user_id)
+        await UserModel.update({
+            nick_name: nick_name,
+            sex: sex,
+            province: location.province,
+            city: location.city,
+            district: location.district
+        }, {
+            where: {
+                id: encode_user_id
+            }
+        })
+        res.json({
+            status: true,
+            message: 'success'
+        })
+        res.end()
+    }
     async getTokenState(req, res) {
         let {
             token

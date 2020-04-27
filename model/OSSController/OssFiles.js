@@ -54,7 +54,7 @@ class OssController {
         this.client.put(fileName, filePath, {
             meta
         }).then(res => {
-            console.log(res)
+            return res
         })
     }
     downloadFile(fileName, filePath) {
