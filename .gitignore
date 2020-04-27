@@ -2,3 +2,4 @@
 /conf/mysql/mysql.js
 /conf/oss/oss.js
 /pem/*
+/public/avatar/*

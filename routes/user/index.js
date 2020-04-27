@@ -9,5 +9,6 @@ router.get('/v1/logout', userType.logout)
 router.get('/v1/token/state', userType.getTokenState)
 router.get('/v1/verification_message', userType.getVerificationCode)
 router.post('/v1/user/info/complete', userType.completeUserInfo)
+router.post('/v1/user/info', userType.getUserInfo)
 
 module.exports = router
