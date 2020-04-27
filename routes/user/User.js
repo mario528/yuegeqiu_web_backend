@@ -9,10 +9,12 @@ const {
 class User {
     constructor() {}
     static _testTokenState (token) {
-        if (!token) return false
-        let tokenAvailable = new Jwt().verifyTokenAvailable(token)
-        if (!tokenAvailable) return false
-        return true
+        return new Promise((reslove, reject) => {
+            if (!token) reject(false)
+            let tokenAvailable = new Jwt().verifyTokenAvailable(token)
+            if (!tokenAvailable.state) reject(false)
+            else reslove(true)
+        })
     }
     async login(req, res) {
         let {
@@ -128,37 +130,37 @@ class User {
     async getUserInfo (req,res) {
         let { token, user_id } = req.body
         if (!token || !user_id) ErrorHandler.handleParamsError(res, '输入参数有误', 500)
-        let token_available = User._testTokenState(token)
-        if (!token_available) {
+        User._testTokenState(token).then(async () => {
+            let decode_user_id = AccountUtils.decodeUserId(user_id)
+            let searchResult = await UserModel.findAll({
+                attributes: ['telephone', 'nick_name', 'head_url'],
+                where: {
+                    id: decode_user_id
+                }
+            })
+            res.json({
+                status: true,
+                data: {
+                    user_info: searchResult[0]
+                }
+            })
+            res.end()
+        }).catch(()=> {
             ErrorHandler.handleParamsError(res, '登陆状态过期', 401)
-        }
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
-        let searchResult = await UserModel.findAll({
-            attributes: ['telephone', 'nick_name', 'head_url'],
-            where: {
-                id: decode_user_id
-            }
         })
-        res.json({
-            status: true,
-            data: {
-                user_info: searchResult[0]
-            }
-        })
-        res.end()
     }
     async getTokenState(req, res) {
         let {
             token
         } = req.query
-        const available = User._testTokenState(token)
-        if (!available) {
+        User._testTokenState(token).then(async () => {
+            res.json({
+                status: available
+            })
+            res.end()
+        }).catch(()=> {
             ErrorHandler.handleParamsError(res, '登陆状态过期', 401)
-        }
-        res.json({
-            status: available
-        })
-        res.end()
+        })        
     }
     getVerificationCode(req, res) {
         res.end()
