@@ -1,6 +1,7 @@
 const { Sequelize } = require('sequelize')
 let sequelizeInstance = require('../../Dao/dbConnect')
-let friendShipModel = sequelizeInstance.define('friend_ship', {
+
+let teamMemberModel = sequelizeInstance.define('team_member', {
     id: {
         type: Sequelize.BIGINT(30),
         primaryKey: true,
@@ -8,20 +9,19 @@ let friendShipModel = sequelizeInstance.define('friend_ship', {
         unique: true,
         autoIncrement: true
     },
-    sponsor_id: {
+    team_id: {
         type: Sequelize.BIGINT(30),
-        allowNull: false
+        allowNull: false,
     },
-    befocused_id: {
-        type: Sequelize.BIGINT(30),
+    user_id: {
+        type: Sequelize.BIGINT(11),
         allowNull: false
     }
-}, {
+},{
     timestamps: false,
-    tableName: 'friend_ship',
+    tableName: 'team_member',
     charset: 'utf8mb4', 
     collate: 'utf8mb4_general_ci',
     underscored: true
 })
-
-module.exports = friendShipModel
+module.exports = teamMemberModel

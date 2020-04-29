@@ -2,6 +2,7 @@ const {
     ErrorHandler,
     AccountUtils,
     Jwt,
+    TimeFormat
 } = require('../../utils/index')
 const {
     UserModel
@@ -54,7 +55,8 @@ class User {
         let {
             telephone,
             password,
-            verification_code
+            verification_code,
+            channel
         } = req.body
         if (!telephone || !password || !verification_code) {
             ErrorHandler.handleParamsError(res)
@@ -73,7 +75,9 @@ class User {
         UserModel.create({
             telephone: telephone,
             password: cryptoInfo.crypto_password,
-            salt: cryptoInfo.salt
+            salt: cryptoInfo.salt,
+            create_at: TimeFormat.formateTime('YYYY-MM-DD HH:MM:SS'),
+            channel: channel || 'web_self_register'
         }).then(res_database => {
             let user_id = res_database.dataValues.id
             let token = new Jwt(user_id).createToken()
