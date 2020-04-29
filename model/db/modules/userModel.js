@@ -19,22 +19,17 @@ let user = sequelizeInstance.define('user', {
     city: Sequelize.STRING(255),
     district: Sequelize.STRING(255),
     channel: Sequelize.STRING(100),
-    create_at: Sequelize.DATE,
+    create_at:  {
+        type: Sequelize.DATE,
+        allowNull: false
+    },
     update_at: Sequelize.DATE
 },{ 
     timestamps: false,
     tableName: 'user',
     charset: 'utf8mb4', 
-    collate: 'utf8mb4_general_ci'
+    collate: 'utf8mb4_general_ci',
+    underscored: true
 })
 
-// user.create({
-//     telephone: '13716863661',
-//     password: '1997528528mja'
-// }).then(res => {
-//     console.log(res, 'user')
-//     sequelizeInstance.close()
-// }).catch(err => {
-//     console.log(err)
-// })
 module.exports = user

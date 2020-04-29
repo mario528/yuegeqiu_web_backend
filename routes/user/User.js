@@ -149,13 +149,34 @@ class User {
             ErrorHandler.handleParamsError(res, '登陆状态过期', 401)
         })
     }
+    async getUserCenterData (req, res) {
+        let { token, user_id } = req.body
+        if (!token || !user_id) ErrorHandler.handleParamsError(res, '输入参数有误', 500)
+        User._testTokenState(token).then(async () => {
+            let decode_user_id = AccountUtils.decodeUserId(user_id)
+            let searchResult = await UserModel.findAll({
+                attributes: ['telephone', 'nick_name', 'head_url', 'sex', 'province', 'city', 'district'],
+                where: {
+                    id: decode_user_id
+                }
+            })
+            res.json({
+                status: true,
+                data: {
+                    user_info: searchResult[0]
+                }
+            })
+        }).catch(()=> {
+            ErrorHandler.handleParamsError(res, '登陆状态过期', 401)
+        })
+    }
     async getTokenState(req, res) {
         let {
             token
         } = req.query
-        User._testTokenState(token).then(async () => {
+        User._testTokenState(token).then(() => {
             res.json({
-                status: available
+                status: true
             })
             res.end()
         }).catch(()=> {
@@ -166,4 +187,4 @@ class User {
         res.end()
     }
 }
-module.exports = User
+module.exports = new User()
