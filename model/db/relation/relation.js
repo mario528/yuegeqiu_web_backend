@@ -1,7 +1,9 @@
 const {
-    UserModel,
-    friendShipModel,
-    teamModel,
-    teamMemberModel
+    User,
+    friendShip,
+    Team,
+    teamMember
 } = require('../modules/index')
-teamMemberModel.belongsTo(teamModel)
+User.belongsToMany(Team, {through: teamMember, as: 'TeamMember'})
+Team.belongsToMany(User, {through: teamMember, as: 'TeamMember'})
+console.log(User.setTeamMember, "++++++++++++++++++")

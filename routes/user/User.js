@@ -5,9 +5,9 @@ const {
     TimeFormat
 } = require('../../utils/index')
 const {
-    UserModel
-} = require('../../model/db/index')
-class User {
+    User
+} = require('../../model/db/modules/index')
+class UserType {
     constructor() {}
     static _testTokenState (token) {
         return new Promise((reslove, reject) => {
@@ -26,16 +26,16 @@ class User {
             ErrorHandler.handleParamsError(res)
             return
         }
-        let searchResult = await UserModel.findAll({
+        let searchResult = await User.findOne({
             where: {
                 telephone: telephone
             }
         })
-        if (searchResult.length == 0) {
+        if (!searchResult) {
             ErrorHandler.handleParamsError(res, '该手机号未注册')
             return
         }
-        let accountInfo = searchResult[0].dataValues
+        let accountInfo = searchResult.dataValues
         if (accountInfo.password != AccountUtils.cryptoPassWord(password, accountInfo.salt).crypto_password) {
             ErrorHandler.handleParamsError(res, '密码输入有误')
             return
@@ -62,21 +62,20 @@ class User {
             ErrorHandler.handleParamsError(res)
             return
         }
-        let isTelephoneAvailable = await UserModel.findAll({
+        let isTelephoneAvailable = await User.findOne({
             where: {
                 telephone: telephone
             }
         })
-        if (isTelephoneAvailable.length != 0) {
+        if (isTelephoneAvailable) {
             ErrorHandler.handleParamsError(res, '该手机号已被注册')
             return
         }
         let cryptoInfo = AccountUtils.cryptoPassWord(password)
-        UserModel.create({
+        User.create({
             telephone: telephone,
             password: cryptoInfo.crypto_password,
             salt: cryptoInfo.salt,
-            create_at: TimeFormat.formateTime('YYYY-MM-DD HH:MM:SS'),
             channel: channel || 'web_self_register'
         }).then(res_database => {
             let user_id = res_database.dataValues.id
@@ -114,7 +113,7 @@ class User {
             return
         }
         let encode_user_id = AccountUtils.decodeUserId(user_id)
-        await UserModel.update({
+        await User.update({
             nick_name: nick_name,
             sex: sex,
             province: location.province,
@@ -134,9 +133,9 @@ class User {
     async getUserInfo (req,res) {
         let { token, user_id } = req.body
         if (!token || !user_id) ErrorHandler.handleParamsError(res, '输入参数有误', 500)
-        User._testTokenState(token).then(async () => {
+        UserType._testTokenState(token).then(async () => {
             let decode_user_id = AccountUtils.decodeUserId(user_id)
-            let searchResult = await UserModel.findAll({
+            let searchResult = await User.findOne({
                 attributes: ['telephone', 'nick_name', 'head_url'],
                 where: {
                     id: decode_user_id
@@ -145,7 +144,7 @@ class User {
             res.json({
                 status: true,
                 data: {
-                    user_info: searchResult[0]
+                    user_info: searchResult
                 }
             })
             res.end()
@@ -156,18 +155,19 @@ class User {
     async getUserCenterData (req, res) {
         let { token, user_id } = req.body
         if (!token || !user_id) ErrorHandler.handleParamsError(res, '输入参数有误', 500)
-        User._testTokenState(token).then(async () => {
+        UserType._testTokenState(token).then(async () => {
             let decode_user_id = AccountUtils.decodeUserId(user_id)
-            let searchResult = await UserModel.findAll({
+            let searchResult = await User.findOne({
                 attributes: ['telephone', 'nick_name', 'head_url', 'sex', 'province', 'city', 'district'],
                 where: {
                     id: decode_user_id
                 }
             })
+            if (!searchResult) ErrorHandler.handleParamsError(res, '未找到该用户', 404)
             res.json({
                 status: true,
                 data: {
-                    user_info: searchResult[0]
+                    user_info: searchResult
                 }
             })
         }).catch(()=> {
@@ -178,7 +178,7 @@ class User {
         let {
             token
         } = req.query
-        User._testTokenState(token).then(() => {
+        UserType._testTokenState(token).then(() => {
             res.json({
                 status: true
             })
@@ -187,8 +187,8 @@ class User {
             ErrorHandler.handleParamsError(res, '登陆状态过期', 401)
         })        
     }
-    getVerificationCode(req, res) {
+    async getVerificationCode(req, res) {
         res.end()
     }
 }
-module.exports = new User()
+module.exports = new UserType()

@@ -9,8 +9,8 @@ const {
     ErrorHandler
 } = require('../../utils/index')
 const {
-    UserModel
-} = require('../../model/db/index')
+    User
+} = require('../../model/db/modules/index')
 class File extends OssFiles{
     constructor () {
         super()
@@ -35,7 +35,7 @@ class File extends OssFiles{
             fs.rename(old_path,new_path,async ()=> {
                 // let ossResult = await super.upLoadFile(save_file_name,new_path)
                 client.put(`${user_id}${ext_name}`, new_path, {}).then(async ossResult => {
-                    await UserModel.update({
+                    await User.update({
                         head_url: ossResult.url
                     }, {
                         where: {
