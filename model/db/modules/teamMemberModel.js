@@ -7,13 +7,11 @@ module.exports = function (sequelize, DataTypes) {
             unique: true,
             autoIncrement: true
         },
-        team_id: {
-            type: DataTypes.BIGINT(30),
-            allowNull: false,
-        },
-        user_id: {
+        role: {
             type: DataTypes.BIGINT(11),
-            allowNull: false
+            allowNull: false,
+            defaultValue: 2,
+            comment: '0: 队长 1: 副队长 2: 队员'
         }
     }, {
         timestamps: false,

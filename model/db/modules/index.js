@@ -1,7 +1,7 @@
 let sequelizeInstance = require('../../Dao/dbConnect')
 const User = sequelizeInstance.import('./userModel')
 const Team = sequelizeInstance.import('./teamModel')
-const FriendShip = sequelizeInstance.import('./teamMemberModel')
+const FriendShip = sequelizeInstance.import('./friendShipModel')
 const TeamMember = sequelizeInstance.import('./teamMemberModel')
 User.belongsToMany(Team, {
     through: TeamMember, 

@@ -4,5 +4,5 @@ const teamType = require('./Team')
 
 router.get('/v1/user/team/info', teamType.getUserTeamInfo)
 router.post('/v1/team/create', teamType.createTeam)
-
+router.post('/v1/team/detail', teamType.getTeamDetail)
 module.exports = router

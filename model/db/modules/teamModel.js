@@ -19,7 +19,9 @@ module.exports = function (sequelize, DataTypes) {
         city: DataTypes.STRING,
         district: DataTypes.STRING,
         activity_position_detail: DataTypes.TEXT,
-        description: DataTypes.TEXT
+        description: DataTypes.TEXT,
+        home_court_color: DataTypes.STRING,
+        away_court_color: DataTypes.STRING
     }, {
         timestamps: false,
         tableName: 'team',
