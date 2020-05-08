@@ -7,10 +7,22 @@ const {
 const {
     User,
     Team,
-    TeamMember
+    TeamMember,
+    TeamActivity
 } = require('../../model/db/modules/index')
 class TeamType {
     constructor () {}
+    static _getTeamActivity (team_id, start_at, end_at) {
+        return new Promise((reslove, reject) => {
+            TeamActivity.findAll({
+                where: {
+                    team_id: team_id
+                }
+            }).then((res) => {
+                reslove(res)
+            })
+        })
+    }
     async getUserTeamInfo (req, res) {
         let { user_id } = req.query
         if (!user_id) ErrorHandler.handleParamsError(res)
@@ -105,17 +117,48 @@ class TeamType {
             item.role = item.team_member.role
             delete item.dataValues.team_member
         })
+        let start_at = new TimeFormat().getMondayBeforeToady()
+        let end_at = new TimeFormat().getSundayAfterDay(15)
+        let calendar_list_activity = await TeamType._getTeamActivity(team_id, start_at, end_at)
+        let calendar_list = new TimeFormat().generateTimeCalendar(start_at, end_at)
+        calendar_list.forEach(item => {
+            calendar_list_activity.forEach((activity_item) => {
+                let time_str = new TimeFormat(activity_item.activity_time).formateTime('YYYY-MM-DD')
+                item.activity = item.date == time_str ? activity_item.activity_content : null
+                item.activity_id = item.date == time_str ? activity_item.id : null
+            })
+        })
         res.json({
             status: true,
             data: {
                 team_info: search_result,
                 team_member: team_member,
-                caleder: {
-                    start_at: TimeFormat.getMondayBeforeToady(),
-                    end_at: TimeFormat.getSundayAfterDay(30),
-                    caleder_list: []
+                calendar: {
+                    start_at: start_at,
+                    end_at: end_at,
+                    calendar_list: calendar_list || []
                 }
             }
+        })
+        res.end()
+    }
+    async updateTeamInform (req, res) {
+        let {   
+            user_id,
+            team_id,
+            inform_detail
+        } = req.body
+        if (!user_id || !team_id || !inform_detail) ErrorHandler.handleParamsError(res)
+        await Team.update({
+            team_inform: inform_detail
+        },{
+            where: {
+                id: team_id
+            }
+        })
+        res.json({
+            status: true,
+            msg: '修改成功'
         })
         res.end()
     }

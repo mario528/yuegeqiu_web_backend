@@ -21,7 +21,8 @@ module.exports = function (sequelize, DataTypes) {
         activity_position_detail: DataTypes.TEXT,
         description: DataTypes.TEXT,
         home_court_color: DataTypes.STRING,
-        away_court_color: DataTypes.STRING
+        away_court_color: DataTypes.STRING,
+        team_inform: DataTypes.TEXT
     }, {
         timestamps: false,
         tableName: 'team',

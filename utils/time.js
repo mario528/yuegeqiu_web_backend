@@ -1,4 +1,4 @@
-class Time {
+class TimeType {
     constructor(date = new Date()) {
         this.date = date
         this.YYYYMMDD = `${this.date.getFullYear()}-${(this.date.getMonth() + 1) < 10 ? '0' + (this.date.getMonth() + 1) : this.date.getMonth() + 1}-${this._adjustLayout(this.date.getDate())}`
@@ -22,11 +22,11 @@ class Time {
         let week = this.date.getDay()
         if (week == 1) {
             // 当天就是周一
-            return new Time().formateTime('YYYY-MM-DD')
+            return new TimeType().formateTime('YYYY-MM-DD')
         }else {
             let days = week == 0 ? 6 : week - 1
             let timeStemp = new Date().valueOf() - (days * 24 * 60 * 60 * 1000)
-            return new Time(new Date(timeStemp)).formateTime('YYYY-MM-DD')
+            return new TimeType(new Date(timeStemp)).formateTime('YYYY-MM-DD')
         }
     }
     getSundayAfterDay ( afterDays = 0 ) {
@@ -35,7 +35,28 @@ class Time {
         week = week == 0 ? 7 : week
         let days = 7 - week
         let timeStemp = time + (days * 24 * 60 * 60 * 1000)
-        return new Time(new Date(timeStemp)).formateTime('YYYY-MM-DD')
+        return new TimeType(new Date(timeStemp)).formateTime('YYYY-MM-DD')
+    }
+    getNextDay(date) {
+        let dateTime = new Date((new Date(date).valueOf() + (24 * 60 * 60 * 1000)));
+        return new TimeType(dateTime).formateTime('YYYY-MM-DD')
+    }
+    generateTimeCalendar (start_time, end_time, calendar_list = []) {
+        let pointer = start_time
+        if (pointer == end_time) {
+            calendar_list.push({
+                date: pointer,
+                is_weekend: [0,6].includes(new Date(pointer).getDay()) 
+            })
+            return calendar_list
+        }else {
+            calendar_list.push({
+                date: pointer,
+                is_weekend: [0,6].includes(new Date(pointer).getDay()) 
+            })
+            pointer = this.getNextDay(pointer)
+            return this.generateTimeCalendar(pointer, end_time, calendar_list)
+        }
     }
 }
-module.exports = new Time()
+module.exports = TimeType
