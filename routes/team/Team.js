@@ -8,7 +8,8 @@ const {
     User,
     Team,
     TeamMember,
-    TeamActivity
+    TeamActivity,
+    TeamActivityMember
 } = require('../../model/db/modules/index')
 class TeamType {
     constructor () {}
@@ -123,9 +124,11 @@ class TeamType {
         let calendar_list = new TimeFormat().generateTimeCalendar(start_at, end_at)
         calendar_list.forEach(item => {
             calendar_list_activity.forEach((activity_item) => {
-                let time_str = new TimeFormat(activity_item.activity_time).formateTime('YYYY-MM-DD')
-                item.activity = item.date == time_str ? activity_item.activity_content : null
-                item.activity_id = item.date == time_str ? activity_item.id : null
+                if (!item.activity_id) {
+                    let time_str = new TimeFormat(activity_item.activity_time).formateTime('YYYY-MM-DD')
+                    item.activity = item.date == time_str ? activity_item.activity_title : null
+                    item.activity_id = item.date == time_str ? activity_item.id : null
+                }
             })
         })
         res.json({
@@ -159,6 +162,78 @@ class TeamType {
         res.json({
             status: true,
             msg: '修改成功'
+        })
+        res.end()
+    }
+    async createTeamActivity (req, res) {
+        let {
+            team_id,
+            user_id,
+            activity_title,
+            activity_date,
+            activity_time,
+            activity_detail
+        } = req.body
+        if (!team_id || !user_id || !activity_title || !activity_date || !activity_time) ErrorHandler.handleParamsError(res)
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
+        Promise.all([
+            TeamActivity.create({
+                team_id: Number(team_id),
+                activity_time: activity_date,
+                activity_hour: activity_time,
+                activity_title: activity_title,
+                activity_detail: activity_detail
+            }),
+            User.findOne({
+                where: {
+                    id: decode_user_id
+                }
+            })
+        ]).then(results => {
+            var teamActivity = results[0];
+            var user = results[1];
+            teamActivity.addTeamActivityMember(user)
+            res.json({
+                data: {},
+                status: true,
+                msg: '活动创建成功'
+            })
+            res.end()
+        })
+    }
+    async getActivityRole (req, res) {
+        let {
+            team_id,
+            user_id,
+            activity_id
+        } = req.body
+        if (!team_id || !user_id || !activity_id) ErrorHandler.handleParamsError(res)
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
+        let join_state = -1
+        let search_result = await TeamActivity.findOne({
+            include: [
+                {
+                    model: User,
+                    as: 'TeamActivityMember',
+                    where: {
+                        id: decode_user_id
+                    }
+                }
+            ],
+            where: {
+                id: activity_id,
+                team_id: team_id
+            }
+        })
+        if (search_result) {
+            if (search_result.TeamActivityMember[0].id == decode_user_id) join_state = 1
+            else join_state = 2
+        }
+        res.json({
+            data: {
+                join_state: join_state
+            },
+            status: true
         })
         res.end()
     }

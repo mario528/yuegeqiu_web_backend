@@ -43,16 +43,21 @@ class TimeType {
     }
     generateTimeCalendar (start_time, end_time, calendar_list = []) {
         let pointer = start_time
+        let todayTimeStemp = new Date(new TimeType().formateTime('YYYY-MM-DD')).valueOf()
         if (pointer == end_time) {
             calendar_list.push({
                 date: pointer,
-                is_weekend: [0,6].includes(new Date(pointer).getDay()) 
+                is_weekend: [0,6].includes(new Date(pointer).getDay()),
+                is_pass: new Date(pointer).valueOf() < todayTimeStemp,
+                is_today: new Date(pointer).valueOf() == todayTimeStemp
             })
             return calendar_list
         }else {
             calendar_list.push({
                 date: pointer,
-                is_weekend: [0,6].includes(new Date(pointer).getDay()) 
+                is_weekend: [0,6].includes(new Date(pointer).getDay()),
+                is_pass:  new Date(pointer).valueOf() < todayTimeStemp,
+                is_today: new Date(pointer).valueOf() == todayTimeStemp
             })
             pointer = this.getNextDay(pointer)
             return this.generateTimeCalendar(pointer, end_time, calendar_list)

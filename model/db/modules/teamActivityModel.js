@@ -7,11 +7,23 @@ module.exports = function (sequlize, DataTypes) {
             unique: true,
             autoIncrement: true
         },
+        team_id: {
+            type: DataTypes.BIGINT(30),
+            allowNull: false
+        },
         activity_time: {
             type: DataTypes.DATE,
             allowNull: false
         },
-        activity_content: DataTypes.TEXT
+        activity_hour: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        activity_title: {
+            type: DataTypes.TEXT,
+            allowNull: false
+        },
+        activity_detail: DataTypes.TEXT
     }, {
         timestamps: false,
         tableName: 'team_activity',
