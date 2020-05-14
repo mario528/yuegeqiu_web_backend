@@ -11,6 +11,7 @@ const {
     TeamActivity,
     TeamActivityMember
 } = require('../../model/db/modules/index')
+const Sequelize = require('sequelize');
 class TeamType {
     constructor () {}
     static _getTeamActivity (team_id, start_at, end_at) {
@@ -96,15 +97,16 @@ class TeamType {
             user_id,
             team_id
         } = req.body
+        let search_result_ismember;
         let decode_user_id = AccountUtils.decodeUserId(user_id)
         let search_result = await Team.findOne({
             include: [
                 {
                     model: User,
                     as: 'TeamMember',
-                    where: {
-                        id: decode_user_id
-                    },
+                    // where: {
+                    //     id: decode_user_id
+                    // },
                     attributes: ['nick_name', 'head_url', 'id'],
                 }
             ],
@@ -112,6 +114,14 @@ class TeamType {
                 id: team_id
             }
         })
+        if (decode_user_id) {
+            search_result_ismember = await TeamMember.findOne({
+                where: {
+                    team_id: team_id,
+                    user_id: decode_user_id
+                }
+            }) 
+        }
         let team_member = search_result.TeamMember
         delete search_result.dataValues.TeamMember
         team_member.forEach(item => {
@@ -140,7 +150,8 @@ class TeamType {
                     start_at: start_at,
                     end_at: end_at,
                     calendar_list: calendar_list || []
-                }
+                },
+                is_member: user_id && search_result_ismember && search_result_ismember.length != 0
             }
         })
         res.end()
@@ -236,6 +247,95 @@ class TeamType {
             status: true
         })
         res.end()
+    }
+    async findTeam (req, res) {
+        let {
+            team_name,
+            province,
+            city,
+            district
+        } = req.body
+        const Op = Sequelize.Op
+        let search_query_by_teamname = {
+            team_name: {
+                [Op.like]:'%' + team_name + '%'
+            }
+        }
+        let search_query_by_location = {
+            province: province,
+            city: city,
+            district: district
+        }
+        let search_query = team_name ? search_query_by_teamname : search_query_by_location
+        let search_result = await Team.findAll({
+            raw: true,
+            attributes: ['id','team_name','team_icon','district', 'description'],
+            where: search_query
+        })
+        res.json({
+            data: search_result,
+            status: true
+        })
+        res.end()
+    }
+    async joinTeam (req, res) {
+        let {
+            user_id,
+            team_id
+        } = req.body
+        if ( !user_id || !team_id ) ErrorHandler.handleParamsError(res)
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
+        Promise.all([
+            Team.findOne({
+                where: {
+                    id: team_id
+                }
+            }),
+            User.findOne({
+                where: {
+                    id: decode_user_id
+                }
+            })
+        ]).then(results => {
+            var team = results[0];
+            var user = results[1];
+            team.addTeamMember(user)
+            res.json({
+                status: true,
+                msg: '球队加入成功'
+            })
+            res.end()
+        })
+
+    }
+    async departTeam (req, res) {
+        let {
+            user_id,
+            team_id
+        } = req.body
+        if ( !user_id || !team_id ) ErrorHandler.handleParamsError(res)
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
+        Promise.all([
+            Team.findOne({
+                where: {
+                    id: team_id
+                }
+            }),
+            User.findOne({
+                where: {
+                    id: decode_user_id
+                }
+            })
+        ]).then(results => {
+            var team = results[0];
+            var user = results[1];
+            team.removeTeamMember(user)
+            res.json({
+                status: true,
+                msg: '离队成功'
+            })
+            res.end()
+        })
     }
 }
 module.exports = new TeamType()
