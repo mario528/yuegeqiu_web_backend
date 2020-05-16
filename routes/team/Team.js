@@ -41,12 +41,22 @@ class TeamType {
                 }
             ]
         })
+
+        let start_at = new TimeFormat().formateTime('YYYY-MM-DD')
+        let end = new TimeFormat().getNextTimesDay(start_at, 6)
+        let end_at = new TimeFormat(end).formateTime('YYYY-MM-DD')
+        let calendar_list = new TimeFormat().generateTimeCalendar(start_at, end_at)
+
         search_result.forEach(item => {
             delete item.dataValues.TeamMember;
         })
         res.json({
             data: {
-                team: search_result || []
+                team: search_result || [],
+                calendar: {
+                    calendar_list: calendar_list,
+                    today_week: new Date(start_at).getDay()
+                }
             },
             status: true
         })
@@ -336,6 +346,38 @@ class TeamType {
             })
             res.end()
         })
+    }
+    async teamSuggest (req, res) {
+        let {
+            user_id
+        } = req.query
+        let decode_user_id, user_location_info;
+        if (user_id) {
+            decode_user_id = AccountUtils.decodeUserId(user_id)
+        }
+        if (user_id) {
+            user_location_info = await User.findOne({
+                attributes: ['province','city','district'],
+                where: {
+                    id: decode_user_id,
+                }
+            })
+        }
+        let suggest_team = await Team.findAll({
+            attributes: ['id','team_name','team_icon', 'description'],
+            where: {
+                district: user_location_info.district || '朝阳区'
+            },
+            limit: 5
+        })
+        res.json({
+            data: {
+                suggest_team_list: suggest_team
+            },
+            status: true
+        })
+        res.end()
+ 
     }
 }
 module.exports = new TeamType()

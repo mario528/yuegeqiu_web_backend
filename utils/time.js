@@ -63,5 +63,8 @@ class TimeType {
             return this.generateTimeCalendar(pointer, end_time, calendar_list)
         }
     }
+    getNextTimesDay (date = new TimeType().formateTime('YYYY-MM-DD'), days = 7) {
+        return new Date(new Date(date).valueOf() + days * 24 * 60 * 60 * 1000)
+    }
 }
 module.exports = TimeType

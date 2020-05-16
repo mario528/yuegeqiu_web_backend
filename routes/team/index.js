@@ -11,4 +11,5 @@ router.post('/v1/team/activity/create', teamType.createTeamActivity)
 router.post('/v1/team/search', teamType.findTeam)
 router.post('/v1/team/join', teamType.joinTeam)
 router.post('/v1/team/depart', teamType.departTeam)
+router.get('/v1/team/suggest', teamType.teamSuggest)
 module.exports = router
