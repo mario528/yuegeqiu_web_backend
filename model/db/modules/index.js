@@ -40,6 +40,19 @@ TeamActivity.belongsToMany(User, {
     constraints: false
 })
 
+User.belongsToMany(User, {
+    through: FriendShip,
+    as: 'FriendShip_sponsor',
+    foreignKey: 'sponsor_id',
+    constraints: false
+})
+User.belongsToMany(User, {
+    through: FriendShip,
+    as: 'FriendShip_befocused',
+    foreignKey: 'befocused_id',
+    constraints: false
+})
+
 sequelizeInstance.sync()
 
 exports.User = User

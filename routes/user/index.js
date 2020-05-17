@@ -10,4 +10,6 @@ router.get('/v1/verification_message', userType.getVerificationCode)
 router.post('/v1/user/info/complete', userType.completeUserInfo)
 router.post('/v1/user/info', userType.getUserInfo)
 router.post('/v1/user/center', userType.getUserCenterData)
+router.get('/v1/user/friend', userType.getUserFriendShip)
+router.post('/v1/user/friend/detail', userType.getUserFriendShipDetail)
 module.exports = router

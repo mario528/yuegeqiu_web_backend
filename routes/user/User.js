@@ -4,7 +4,8 @@ const {
     Jwt
 } = require('../../utils/index')
 const {
-    User
+    User,
+    FriendShip
 } = require('../../model/db/modules/index')
 class UserType {
     constructor() {}
@@ -187,6 +188,63 @@ class UserType {
         })        
     }
     async getVerificationCode(req, res) {
+        res.end()
+    }
+    async getUserFriendShip (req, res) {
+        let {
+            user_id
+        } = req.query
+        if ( !user_id ) ErrorHandler.handleParamsError(res, '输入参数有误', 500)
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
+        let user = await User.findOne({
+            row: true,
+            where: {
+                id: decode_user_id
+            }
+        })
+        let follow_num = await user.getFriendShip_befocused()
+        let attention_num = await user.getFriendShip_sponsor()
+        res.json({
+            status: true,
+            data: {
+                friend_ship: {
+                    attention_num: attention_num.length,
+                    follow_num: follow_num.length
+                }
+            }
+        })
+        res.end()
+    }
+    async getUserFriendShipDetail (req, res) {
+        let {
+            interview_user_id,
+            mode,
+            user_id
+        } = req.body
+        if ( !interview_user_id ) ErrorHandler.handleParamsError(res)
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
+        let decode_interview_user_id = AccountUtils.decodeUserId(interview_user_id)
+        mode == undefined ? mode = 1 : +mode
+        let interview_user_info = await User.findOne({
+            where: {
+                id: decode_interview_user_id
+            },
+            attributes: ['nick_name', 'head_url', 'sex', 'id']
+        })   
+        let friend_detail
+        if ( mode == 1 ) {
+            friend_detail = await interview_user_info.getFriendShip_sponsor()
+        } else {
+            friend_detail = await interview_user_info.getFriendShip_befocused()
+        }
+        res.json({
+            status: true,
+            data: {
+                is_self: decode_user_id == decode_interview_user_id,
+                interview_user_info: interview_user_info,
+                friend_list: friend_detail
+            }
+        })
         res.end()
     }
 }
