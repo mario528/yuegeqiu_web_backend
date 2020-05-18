@@ -216,12 +216,19 @@ class UserType {
         res.end()
     }
     async getUserFriendShipDetail (req, res) {
+        const PAGE_SIZE = 5
         let {
             interview_user_id,
             mode,
-            user_id
-        } = req.body
-        if ( !interview_user_id ) ErrorHandler.handleParamsError(res)
+            user_id,
+            page
+        } = req.body;
+        (page == undefined) ? page = 0 : page;
+        let offset = page * PAGE_SIZE
+        if ( !interview_user_id || page == -1 ) {
+            ErrorHandler.handleParamsError(res)
+            return
+        }
         let decode_user_id = AccountUtils.decodeUserId(user_id)
         let decode_interview_user_id = AccountUtils.decodeUserId(interview_user_id)
         mode == undefined ? mode = 1 : +mode
@@ -231,18 +238,26 @@ class UserType {
             },
             attributes: ['nick_name', 'head_url', 'sex', 'id']
         })   
-        let friend_detail
+        let friend_detail, all_number, page_index
         if ( mode == 1 ) {
-            friend_detail = await interview_user_info.getFriendShip_sponsor()
+            all_number = await interview_user_info.countFriendShip_sponsor()
+            friend_detail = await interview_user_info.getFriendShip_sponsor({
+                offset: offset,
+                limit: PAGE_SIZE
+            })
         } else {
+            all_number = await interview_user_info.countFriendShip_befocused();
             friend_detail = await interview_user_info.getFriendShip_befocused()
         }
+        page_index = all_number - (((PAGE_SIZE + 1) * page) + friend_detail.length) > 0 ? ++page : -1
         res.json({
             status: true,
             data: {
                 is_self: decode_user_id == decode_interview_user_id,
                 interview_user_info: interview_user_info,
-                friend_list: friend_detail
+                friend_list: friend_detail,
+                next_page: page_index,
+                page_total: all_number
             }
         })
         res.end()
