@@ -262,5 +262,28 @@ class UserType {
         })
         res.end()
     }
+    async getUserInfoByUpdate (req, res) {
+        let {
+            user_id
+        } = req.body
+        if ( !user_id ) {
+            ErrorHandler.handleParamsError(res)
+            return
+        }
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
+        let user_info = await User.findOne({
+            where: {
+                id: decode_user_id
+            },
+            attributes: ['nick_name','head_url','sex','province','city','district']
+        })
+        res.json({
+            data: {
+                user_info
+            },
+            status: true
+        })
+        res.end()
+    }
 }
 module.exports = new UserType()
