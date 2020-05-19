@@ -112,7 +112,7 @@ class UserType {
             ErrorHandler.handleParamsError(res)
             return
         }
-        let encode_user_id = AccountUtils.decodeUserId(user_id)
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
         await User.update({
             nick_name: nick_name,
             sex: sex,
@@ -121,7 +121,7 @@ class UserType {
             district: location.district
         }, {
             where: {
-                id: encode_user_id
+                id: decode_user_id
             }
         })
         res.json({
@@ -282,6 +282,41 @@ class UserType {
                 user_info
             },
             status: true
+        })
+        res.end()
+    }
+    async updateUserInfo (req, res) {
+        let {
+            user_id,
+            nick_name,
+            sex,
+            location
+        } = req.body
+        if (!user_id) {
+            ErrorHandler.handleParamsError(res)
+            return
+        }else if (nick_name != undefined && nick_name == '') {
+            ErrorHandler.handleParamsError(res)
+            return
+        }
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
+        let key = nick_name != undefined ? 'nick_name' : sex != undefined ? 'sex' : 'location'
+        let params = {} 
+        if (key == 'location') {
+            params.province = location.province
+            params.city = location.city
+            params.district = location.district
+        }else {
+            params[key] = req.body[key]
+        }
+        let sql_result = await User.update(params, {
+            where: {
+                id: decode_user_id
+            }
+        })
+        res.json({
+            status: sql_result.length != 0,
+            msg: sql_result.length != 0 ? '修改成功' : '修改失败'
         })
         res.end()
     }
