@@ -91,7 +91,7 @@ class TeamType {
         ]).then(results => {
             var team = results[0];
             var user = results[1];
-            team.addTeamMember(user)
+            team.addTeamMember(user,{ through: { role: 0 }})
             res.json({
                 data: {
                     team_id: team.id
@@ -134,9 +134,13 @@ class TeamType {
         }
         let team_member = search_result.TeamMember
         delete search_result.dataValues.TeamMember
-        team_member.forEach(item => {
-            item.role = item.team_member.role
-            delete item.dataValues.team_member
+        team_member = team_member.map(item => {
+            return {
+                head_url: item.head_url,
+                id: item.id,
+                role: item.team_member.role,
+                nick_name: item.nick_name
+            }
         })
         let start_at = new TimeFormat().getMondayBeforeToady()
         let end_at = new TimeFormat().getSundayAfterDay(15)

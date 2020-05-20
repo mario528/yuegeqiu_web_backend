@@ -1,3 +1,4 @@
+let sequlize = require('sequelize')
 let sequelizeInstance = require('../../Dao/dbConnect')
 // 用户表
 const User = sequelizeInstance.import('./userModel')
