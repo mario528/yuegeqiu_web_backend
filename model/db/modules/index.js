@@ -12,6 +12,10 @@ const TeamMember = sequelizeInstance.import('./teamMemberModel')
 const TeamActivity = sequelizeInstance.import('./teamActivityModel')
 // 球队活动成员表
 const TeamActivityMember = sequelizeInstance.import('./teamActivityMemberModel')
+// 赛事表
+const Match = sequelizeInstance.import('./matchModel')
+// 赛事关系表
+const MatchMember = sequelizeInstance.import('./matchMemberModel')
 // n : m
 User.belongsToMany(Team, {
     through: TeamMember, 
@@ -54,6 +58,19 @@ User.belongsToMany(User, {
     constraints: false
 })
 
+Match.belongsToMany(Team, {
+    through: MatchMember, 
+    as: 'MatchMember',
+    foreignKey: 'match_id',
+    constraints: false
+})
+Team.belongsToMany(Match, {
+    through: MatchMember, 
+    as: 'MatchMember',
+    foreignKey: 'team_id',
+    constraints: false
+})
+
 sequelizeInstance.sync()
 
 exports.User = User
@@ -62,3 +79,4 @@ exports.FriendShip = FriendShip
 exports.TeamMember = TeamMember
 exports.TeamActivity = TeamActivity
 exports.TeamActivityMember = TeamActivityMember
+exports.Match = Match
