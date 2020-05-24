@@ -1,4 +1,4 @@
-const Sequelize = require('Sequelize')
+const Sequelize = require('sequelize')
 const conf = require('../../conf/mysql/mysql')
 let sequelizeInstance = new Sequelize(conf.database, conf.user, conf.password, {
     host: conf.host,

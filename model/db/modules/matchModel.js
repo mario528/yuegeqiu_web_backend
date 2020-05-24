@@ -1,3 +1,4 @@
+const { TimeFormat } = require('../../../utils/index')
 module.exports = function (sequelize, DataTypes) {
     return sequelize.define('match', {
         id: {

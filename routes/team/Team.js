@@ -9,7 +9,9 @@ const {
     Team,
     TeamMember,
     TeamActivity,
-    TeamActivityMember
+    TeamActivityMember,
+    Match,
+    MatchMember
 } = require('../../model/db/modules/index')
 const Sequelize = require('sequelize');
 class TeamType {
@@ -155,6 +157,7 @@ class TeamType {
                 }
             })
         })
+        let match_list = await search_result.getMatchMember()
         let team_role = user_id == null ? null : await TeamMember.findOne({
             where: {
                 team_id: team_id,
@@ -173,7 +176,24 @@ class TeamType {
                     end_at: end_at,
                     calendar_list: calendar_list || []
                 },
-                is_member: user_id && search_result_ismember && search_result_ismember.length != 0
+                is_member: user_id && search_result_ismember && search_result_ismember.length != 0,
+                match_list: match_list.map(item => {
+                    return {
+                        id: item.id,
+                        match_name: item.match_name,
+                        match_property: item.match_property,
+                        match_type: item.match_type,
+                        start_time: item.start_time,
+                        end_time: item.end_time,
+                        max_team_number: item.max_team_number,
+                        match_detail: item.match_detail,
+                        match_location: {
+                            province: item.match_province,
+                            city: item.match_city,
+                            district: item.match_district
+                        }
+                    }
+                })
             }
         })
         res.end()
@@ -363,7 +383,7 @@ class TeamType {
         let {
             user_id
         } = req.query
-        let decode_user_id, user_location_info;
+        let decode_user_id, user_location_info, suggest_team;
         if (user_id) {
             decode_user_id = AccountUtils.decodeUserId(user_id)
         }
@@ -375,10 +395,10 @@ class TeamType {
                 }
             })
         }
-        let suggest_team = await Team.findAll({
+        suggest_team = await Team.findAll({
             attributes: ['id','team_name','team_icon', 'description'],
             where: {
-                district: user_location_info.district || '朝阳区'
+                district: (user_location_info && user_location_info.district) || '朝阳区'
             },
             limit: 5
         })
