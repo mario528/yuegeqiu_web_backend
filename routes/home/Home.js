@@ -12,6 +12,7 @@ const {
     TeamActivityMember,
     Match
 } = require('../../model/db/modules/index')
+const cache = require('../../model/Cache/cache')
 const Op = require('sequelize').Op
 class Home {
     constructor () {}
@@ -49,9 +50,16 @@ class Home {
                 attributes: { exclude: ['end_time', 'start_time'] },
                 limit: 5
             })  
-        } 
+        }
+        let user_count = await User.findAndCountAll()
+        let team_count = await Team.findAndCountAll()
         res.json({
             data: {
+                project_detail: {
+                    online_number: global.online_number,
+                    user_count: user_count.count,
+                    team_count: team_count.count
+                },
                 match_list: match_list,
                 banner: [
                     {
