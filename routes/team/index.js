@@ -12,4 +12,6 @@ router.post('/v1/team/search', teamType.findTeam)
 router.post('/v1/team/join', teamType.joinTeam)
 router.post('/v1/team/depart', teamType.departTeam)
 router.get('/v1/team/suggest', teamType.teamSuggest)
+router.post('/v1/team', teamType.getTeamPageDetail)
+router.get('/v1/team/map', teamType.teamMap)
 module.exports = router

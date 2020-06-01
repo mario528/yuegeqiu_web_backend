@@ -39,6 +39,7 @@ global.online_number = 220
 socket_io.on('connection', (socket) => {
     console.log("创建socket连接")
     global.online_number = ++ global.online_number
+    global.$socket = socket
     socket.broadcast.emit('onlineNumber', {
         online_number: global.online_number
     })

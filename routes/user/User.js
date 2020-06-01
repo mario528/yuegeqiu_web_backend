@@ -77,10 +77,14 @@ class UserType {
             password: cryptoInfo.crypto_password,
             salt: cryptoInfo.salt,
             channel: channel || 'web_self_register'
-        }).then(res_database => {
+        }).then(async res_database => {
             let user_id = res_database.dataValues.id
             let token = new Jwt(user_id).createToken()
             let encode_id = AccountUtils.cryptoUserId(user_id)
+            // 暂时不考虑性能的情况下 在用户注册后 直接推送 但用户量大后 考虑会引发前端性能问题
+            await global.$socket.broadcast.emit('addUser', {
+                user_number: user_id
+            })
             res.json({
                 status: true,
                 msg: '注册成功',

@@ -66,7 +66,7 @@ class Home {
                         url: 'https://yuegeqiu-mario.oss-cn-beijing.aliyuncs.com/banner_1.jpg'
                     },
                     {
-                        url: 'https://yuegeqiu-mario.oss-cn-beijing.aliyuncs.com/banner_1.jpg'
+                        url: 'https://yuegeqiu-mario.oss-cn-beijing.aliyuncs.com/banner_2.jpg'
                     }
                 ],
                 news_list: [

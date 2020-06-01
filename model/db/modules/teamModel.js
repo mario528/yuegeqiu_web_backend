@@ -22,7 +22,15 @@ module.exports = function (sequelize, DataTypes) {
         description: DataTypes.TEXT,
         home_court_color: DataTypes.STRING,
         away_court_color: DataTypes.STRING,
-        team_inform: DataTypes.TEXT
+        team_inform: DataTypes.TEXT,
+        longitude: {
+            type: DataTypes.DOUBLE(10,6),
+            allowNull: false,
+        },
+        latitude: {
+            type: DataTypes.DOUBLE(10,6),
+            allowNull: false,
+        }
     }, {
         timestamps: false,
         tableName: 'team',
