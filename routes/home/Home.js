@@ -69,24 +69,7 @@ class Home {
                         url: 'https://yuegeqiu-mario.oss-cn-beijing.aliyuncs.com/banner_2.jpg'
                     }
                 ],
-                news_list: [
-                    {
-                        article_title: '惊！',
-                        article_id: 0
-                    },
-                    {
-                        article_title: '约个球',
-                        article_id: 1
-                    },
-                    {
-                        article_title: '加油',
-                        article_id: 2
-                    },
-                    {
-                        article_title: '我的妈呀',
-                        article_id: 3
-                    }
-                ]
+                news_list: []
             },
             status: true
         }) 
