@@ -14,4 +14,6 @@ router.post('/v1/team/depart', teamType.departTeam)
 router.get('/v1/team/suggest', teamType.teamSuggest)
 router.post('/v1/team', teamType.getTeamPageDetail)
 router.get('/v1/team/map', teamType.teamMap)
+router.get('/v1/team/update/member/number', teamType.switchTeamMemberNumber)
+router.get('/v1/team/update/member/position', teamType.switchTeamMemberPosition)
 module.exports = router

@@ -155,7 +155,9 @@ class TeamType {
                 head_url: item.head_url,
                 id: item.id,
                 role: item.team_member.role,
-                nick_name: item.nick_name
+                nick_name: item.nick_name,
+                team_number: item.team_member.team_number || null,
+                team_position: item.team_member.team_position || null
             }
         })
         let start_at = new TimeFormat().getMondayBeforeToady()
@@ -486,6 +488,68 @@ class TeamType {
             status: true
         })
         res.end()
+    }
+    async switchTeamMemberNumber (req,res) {
+        let {
+            user_id,
+            team_number,
+            team_id
+        } = req.query
+        if (!user_id || !team_number || !team_id) ErrorHandler.handleParamsError(res)
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
+        Promise.all([
+            Team.findOne({
+                id: team_id
+            }),
+            User.findOne({
+                where: {
+                    id: decode_user_id
+                }
+            })
+        ]).then(async results => {
+            const team = results[0];
+            const user = results[1];
+            await team.setTeamMember(user, {
+                through: {
+                    team_number: team_number
+                }
+            })
+            res.json({
+                status: true
+            })
+            res.end()  
+        })
+    }
+    async switchTeamMemberPosition (req,res) {
+        let {
+            user_id,
+            team_position,
+            team_id
+        } = req.query
+        if (!user_id || !team_position || !team_id) ErrorHandler.handleParamsError(res)
+        let decode_user_id = AccountUtils.decodeUserId(user_id)
+        Promise.all([
+            Team.findOne({
+                id: team_id
+            }),
+            User.findOne({
+                where: {
+                    id: decode_user_id
+                }
+            })
+        ]).then(async results => {
+            const team = results[0];
+            const user = results[1];
+            await team.setTeamMember(user, {
+                through: {
+                    team_position: team_position
+                }
+            })
+            res.json({
+                status: true
+            })
+            res.end()  
+        })
     }
 }
 module.exports = new TeamType()
