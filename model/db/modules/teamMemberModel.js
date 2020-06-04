@@ -20,7 +20,7 @@ module.exports = function (sequelize, DataTypes) {
         team_position: {
             type: DataTypes.BIGINT(11),
             allowNull: true,
-            comment: '0: 门将 1: 边后卫 2: 中后卫 3: 后腰 4：前腰 5: 边锋 6: 前锋'
+            comment: '0: 门将 1: 边后卫 2: 中后卫 3: 后腰 4：前腰 5: 边锋 6: 前锋 7: 教练'
         },
     }, {
         timestamps: false,

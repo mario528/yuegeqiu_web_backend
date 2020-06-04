@@ -178,15 +178,14 @@ class TeamType {
             where: {
                 team_id: team_id,
                 user_id: decode_user_id
-            },
-            attributes: ['role'],
+            }
         })
         res.json({
             status: true,
             data: {
                 team_info: search_result,
                 team_member: team_member,
-                team_role: team_role.role,
+                team_role: team_role ? team_role.role : false,
                 calendar: {
                     start_at: start_at,
                     end_at: end_at,
