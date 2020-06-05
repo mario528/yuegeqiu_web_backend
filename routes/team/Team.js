@@ -219,7 +219,7 @@ class TeamType {
             team_id,
             inform_detail
         } = req.body
-        if (!user_id || !team_id || !inform_detail) ErrorHandler.handleParamsError(res)
+        if (!user_id || !team_id) ErrorHandler.handleParamsError(res)
         await Team.update({
             team_inform: inform_detail
         }, {
@@ -446,7 +446,9 @@ class TeamType {
         }
         hot_match_list = await Match.findAll({
             limit: 5,
-            attributes: { exclude: ['end_time', 'start_time', 'creat_id'] },
+            attributes: {
+                exclude: ['end_time', 'start_time', 'creat_id']
+            },
             where: {
                 start_time: {
                     [Op.gt]: new TimeFormat().formateTime('YYYY-MM-DD')
@@ -469,7 +471,7 @@ class TeamType {
         })
         res.end()
     }
-    async teamMap (req,res) {
+    async teamMap(req, res) {
         let {
             city
         } = req.query
@@ -488,7 +490,7 @@ class TeamType {
         })
         res.end()
     }
-    async switchTeamMemberNumber (req,res) {
+    async switchTeamMemberNumber(req, res) {
         let {
             user_id,
             team_number,
@@ -496,30 +498,19 @@ class TeamType {
         } = req.query
         if (!user_id || !team_number || !team_id) ErrorHandler.handleParamsError(res)
         let decode_user_id = AccountUtils.decodeUserId(user_id)
-        Promise.all([
-            Team.findOne({
-                id: team_id
-            }),
-            User.findOne({
-                where: {
-                    id: decode_user_id
-                }
-            })
-        ]).then(async results => {
-            const team = results[0];
-            const user = results[1];
-            await team.setTeamMember(user, {
-                through: {
-                    team_number: team_number
-                }
-            })
-            res.json({
-                status: true
-            })
-            res.end()  
+        await TeamMember.update({
+            team_number: team_number
+        }, {
+            where: {
+                user_id: decode_user_id
+            }
+        })
+        res.json({
+            data: {},
+            status: true
         })
     }
-    async switchTeamMemberPosition (req,res) {
+    async switchTeamMemberPosition(req, res) {
         let {
             user_id,
             team_position,
@@ -527,27 +518,16 @@ class TeamType {
         } = req.query
         if (!user_id || !team_position || !team_id) ErrorHandler.handleParamsError(res)
         let decode_user_id = AccountUtils.decodeUserId(user_id)
-        Promise.all([
-            Team.findOne({
-                id: team_id
-            }),
-            User.findOne({
-                where: {
-                    id: decode_user_id
-                }
-            })
-        ]).then(async results => {
-            const team = results[0];
-            const user = results[1];
-            await team.setTeamMember(user, {
-                through: {
-                    team_position: team_position
-                }
-            })
-            res.json({
-                status: true
-            })
-            res.end()  
+        await TeamMember.update({
+            team_position: team_position
+        }, {
+            where: {
+                user_id: decode_user_id
+            }
+        })
+        res.json({
+            data: {},
+            status: true
         })
     }
 }
