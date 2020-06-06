@@ -1,6 +1,5 @@
 const {
     ErrorHandler,
-    AccountUtils,
     Jwt,
     TimeFormat
 } = require('../../utils/index')
@@ -34,7 +33,6 @@ class TeamType {
             user_id
         } = req.query
         if (!user_id) ErrorHandler.handleParamsError(res)
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         let search_result = await Team.findAll({
             attributes: {
                 exclude: ['users']
@@ -43,7 +41,7 @@ class TeamType {
                 model: User,
                 as: 'TeamMember',
                 where: {
-                    id: decode_user_id
+                    id: user_id
                 }
             }]
         })
@@ -79,7 +77,6 @@ class TeamType {
             latitude,
             user_id
         } = req.body
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         Promise.all([
             Team.create({
                 team_name: team_name,
@@ -95,7 +92,7 @@ class TeamType {
             }),
             User.findOne({
                 where: {
-                    id: decode_user_id
+                    id: user_id
                 }
             })
         ]).then(async results => {
@@ -126,25 +123,21 @@ class TeamType {
             team_id
         } = req.body
         let search_result_ismember;
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         let search_result = await Team.findOne({
             include: [{
                 model: User,
                 as: 'TeamMember',
-                // where: {
-                //     id: decode_user_id
-                // },
                 attributes: ['nick_name', 'head_url', 'id'],
             }],
             where: {
                 id: team_id
             }
         })
-        if (decode_user_id) {
+        if (user_id) {
             search_result_ismember = await TeamMember.findOne({
                 where: {
                     team_id: team_id,
-                    user_id: decode_user_id
+                    user_id: user_id
                 }
             })
         }
@@ -177,7 +170,7 @@ class TeamType {
         let team_role = user_id == null ? null : await TeamMember.findOne({
             where: {
                 team_id: team_id,
-                user_id: decode_user_id
+                user_id: user_id
             }
         })
         res.json({
@@ -243,7 +236,6 @@ class TeamType {
             activity_detail
         } = req.body
         if (!team_id || !user_id || !activity_title || !activity_date || !activity_time) ErrorHandler.handleParamsError(res)
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         Promise.all([
             TeamActivity.create({
                 team_id: Number(team_id),
@@ -254,7 +246,7 @@ class TeamType {
             }),
             User.findOne({
                 where: {
-                    id: decode_user_id
+                    id: user_id
                 }
             })
         ]).then(results => {
@@ -276,14 +268,13 @@ class TeamType {
             activity_id
         } = req.body
         if (!team_id || !user_id || !activity_id) ErrorHandler.handleParamsError(res)
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         let join_state = -1
         let search_result = await TeamActivity.findOne({
             include: [{
                 model: User,
                 as: 'TeamActivityMember',
                 where: {
-                    id: decode_user_id
+                    id: user_id
                 }
             }],
             where: {
@@ -292,7 +283,7 @@ class TeamType {
             }
         })
         if (search_result) {
-            if (search_result.TeamActivityMember[0].id == decode_user_id) join_state = 1
+            if (search_result.TeamActivityMember[0].id == user_id) join_state = 1
             else join_state = 2
         }
         res.json({
@@ -338,7 +329,6 @@ class TeamType {
             team_id
         } = req.body
         if (!user_id || !team_id) ErrorHandler.handleParamsError(res)
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         Promise.all([
             Team.findOne({
                 where: {
@@ -347,7 +337,7 @@ class TeamType {
             }),
             User.findOne({
                 where: {
-                    id: decode_user_id
+                    id: user_id
                 }
             })
         ]).then(results => {
@@ -368,7 +358,6 @@ class TeamType {
             team_id
         } = req.body
         if (!user_id || !team_id) ErrorHandler.handleParamsError(res)
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         Promise.all([
             Team.findOne({
                 where: {
@@ -377,7 +366,7 @@ class TeamType {
             }),
             User.findOne({
                 where: {
-                    id: decode_user_id
+                    id: user_id
                 }
             })
         ]).then(results => {
@@ -395,15 +384,12 @@ class TeamType {
         let {
             user_id
         } = req.query
-        let decode_user_id, user_location_info, suggest_team;
-        if (user_id) {
-            decode_user_id = AccountUtils.decodeUserId(user_id)
-        }
+        let user_location_info, suggest_team;
         if (user_id) {
             user_location_info = await User.findOne({
                 attributes: ['province', 'city', 'district'],
                 where: {
-                    id: decode_user_id,
+                    id: user_id,
                 }
             })
         }
@@ -427,10 +413,9 @@ class TeamType {
         let {
             user_id
         } = req.body
-        let decode_user_id, team_list = [],
+        let team_list = [],
             hot_match_list = [];
         if (user_id) {
-            decode_user_id = AccountUtils.decodeUserId(user_id)
             team_list = await Team.findAll({
                 attributes: {
                     exclude: ['users']
@@ -439,7 +424,7 @@ class TeamType {
                     model: User,
                     as: 'TeamMember',
                     where: {
-                        id: decode_user_id
+                        id: user_id
                     }
                 }]
             })
@@ -497,12 +482,11 @@ class TeamType {
             team_id
         } = req.query
         if (!user_id || !team_number || !team_id) ErrorHandler.handleParamsError(res)
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         await TeamMember.update({
             team_number: team_number
         }, {
             where: {
-                user_id: decode_user_id
+                user_id: user_id
             }
         })
         res.json({
@@ -517,12 +501,11 @@ class TeamType {
             team_id
         } = req.query
         if (!user_id || !team_position || !team_id) ErrorHandler.handleParamsError(res)
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         await TeamMember.update({
             team_position: team_position
         }, {
             where: {
-                user_id: decode_user_id
+                user_id: user_id
             }
         })
         res.json({

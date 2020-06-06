@@ -8,6 +8,7 @@ let app = express()
 let http = require('http').createServer(app)
 let socket_io = require('socket.io')(http)
 let cache = require('./model/Cache/cache')
+let { AccountUtils } = require('./utils/index')
 // gloabl redis_client
 global.redis_client = require('redis').createClient(redis_conf)
 // add app middleWare
@@ -18,23 +19,21 @@ app.use(bodyParser.json())
 // register router middleWare
 app.use(express.static(path.join(__dirname, 'public')))
 app.use('/api/docs', express.static('public/swagger'))
-// websocket
+
+// user-defined middleware
+app.use(function(req, res, next) {
+    // decode user_id in req 
+    if (req.body.user_id || req.query.user_id) {
+        req.body.user_id ? req.body.user_id = AccountUtils.decodeUserId(req.body.user_id) :  req.query.user_id = AccountUtils.decodeUserId(req.query.user_id)
+    }
+    next()
+})
 
 routeDecorate(app)
 
 const server = http.listen(3000, () => {
     console.log("Now Node.js server is running")
 })
-// socket_io.on('connection', (socket) => {
-//    console.log("创建socket连接")
-//    let socket_id = socket.id
-//    cache.set(`user_${socket_id}`, true)
-//    socket.on('event', data => { /* … */ });
-//    socket.on('disconnect', () => { 
-//       cache.del(`user_${socket_id}`)
-//       console.log("断开连接")
-//    });
-// })
 global.online_number = 220
 socket_io.on('connection', (socket) => {
     console.log("创建socket连接")

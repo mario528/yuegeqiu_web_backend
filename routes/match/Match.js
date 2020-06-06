@@ -1,6 +1,5 @@
 const {
     ErrorHandler,
-    AccountUtils,
     Jwt,
     TimeFormat
 } = require('../../utils/index')
@@ -22,11 +21,10 @@ class MatchType {
             ErrorHandler.handleParamsError()
             return;
         }
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         Promise.all([
             User.findOne({
                 where: {
-                    id: decode_user_id
+                    id: user_id
                 }
             })
         ]).then(async search_result => {
@@ -67,10 +65,9 @@ class MatchType {
             ErrorHandler.handleParamsError()
             return;
         }
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         Promise.all([
             Match.create({
-                creat_id: decode_user_id,
+                creat_id: user_id,
                 match_name: match_name,
                 match_property: match_property,
                 match_type: match_type,

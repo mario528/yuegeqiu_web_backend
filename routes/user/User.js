@@ -116,7 +116,6 @@ class UserType {
             ErrorHandler.handleParamsError(res)
             return
         }
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         await User.update({
             nick_name: nick_name,
             sex: sex,
@@ -125,7 +124,7 @@ class UserType {
             district: location.district
         }, {
             where: {
-                id: decode_user_id
+                id: user_id
             }
         })
         res.json({
@@ -138,11 +137,10 @@ class UserType {
         let { token, user_id } = req.body
         if (!token || !user_id) ErrorHandler.handleParamsError(res, '输入参数有误', 500)
         UserType._testTokenState(token).then(async () => {
-            let decode_user_id = AccountUtils.decodeUserId(user_id)
             let searchResult = await User.findOne({
                 attributes: ['telephone', 'nick_name', 'head_url'],
                 where: {
-                    id: decode_user_id
+                    id: user_id
                 }
             })
             res.json({
@@ -160,11 +158,10 @@ class UserType {
         let { token, user_id } = req.body
         if (!token || !user_id) ErrorHandler.handleParamsError(res, '输入参数有误', 500)
         UserType._testTokenState(token).then(async () => {
-            let decode_user_id = AccountUtils.decodeUserId(user_id)
             let searchResult = await User.findOne({
                 attributes: ['telephone', 'nick_name', 'head_url', 'sex', 'province', 'city', 'district'],
                 where: {
-                    id: decode_user_id
+                    id: user_id
                 }
             })
             if (!searchResult) ErrorHandler.handleParamsError(res, '未找到该用户', 404)
@@ -199,11 +196,10 @@ class UserType {
             user_id
         } = req.query
         if ( !user_id ) ErrorHandler.handleParamsError(res, '输入参数有误', 500)
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         let user = await User.findOne({
             row: true,
             where: {
-                id: decode_user_id
+                id: user_id
             }
         })
         let follow_num = await user.getFriendShip_befocused()
@@ -233,7 +229,6 @@ class UserType {
             ErrorHandler.handleParamsError(res)
             return
         }
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         let decode_interview_user_id = AccountUtils.decodeUserId(interview_user_id)
         mode == undefined ? mode = 1 : +mode
         let interview_user_info = await User.findOne({
@@ -257,7 +252,7 @@ class UserType {
         res.json({
             status: true,
             data: {
-                is_self: decode_user_id == decode_interview_user_id,
+                is_self: user_id == decode_interview_user_id,
                 interview_user_info: interview_user_info,
                 friend_list: friend_detail,
                 next_page: page_index,
@@ -274,10 +269,9 @@ class UserType {
             ErrorHandler.handleParamsError(res)
             return
         }
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         let user_info = await User.findOne({
             where: {
-                id: decode_user_id
+                id: user_id
             },
             attributes: ['nick_name','head_url','sex','province','city','district']
         })
@@ -303,7 +297,6 @@ class UserType {
             ErrorHandler.handleParamsError(res)
             return
         }
-        let decode_user_id = AccountUtils.decodeUserId(user_id)
         let key = nick_name != undefined ? 'nick_name' : sex != undefined ? 'sex' : 'location'
         let params = {} 
         if (key == 'location') {
@@ -315,7 +308,7 @@ class UserType {
         }
         let sql_result = await User.update(params, {
             where: {
-                id: decode_user_id
+                id: user_id
             }
         })
         res.json({

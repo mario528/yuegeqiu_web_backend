@@ -5,7 +5,6 @@ const OSS = require('ali-oss')
 const OssFiles = require('../../model/OSSController/OssFiles')
 const ossStore = require('../../conf/oss/oss')
 const {
-    AccountUtils,
     ErrorHandler
 } = require('../../utils/index')
 const {
@@ -40,7 +39,7 @@ class File extends OssFiles{
                         head_url: ossResult.url
                     }, {
                         where: {
-                            id: AccountUtils.decodeUserId(user_id)
+                            id: user_id
                         }
                     })
                     res.json({

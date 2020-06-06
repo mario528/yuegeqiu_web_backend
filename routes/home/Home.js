@@ -1,7 +1,4 @@
 const {
-    ErrorHandler,
-    AccountUtils,
-    Jwt,
     TimeFormat
 } = require('../../utils/index')
 const {
@@ -20,14 +17,11 @@ class Home {
         let { 
             user_id
         } = req.body
-        let decode_user_id, match_list
-        if (user_id) {
-            decode_user_id = AccountUtils.decodeUserId(user_id)
-        }
+        let match_list
         if (user_id) {
             let user_info = await User.findOne({
                 where: {
-                    id: decode_user_id
+                    id: user_id
                 }
             })
             match_list = await Match.findAll({
