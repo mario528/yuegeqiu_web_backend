@@ -5,7 +5,8 @@ const OSS = require('ali-oss')
 const OssFiles = require('../../model/OSSController/OssFiles')
 const ossStore = require('../../conf/oss/oss')
 const {
-    ErrorHandler
+    ErrorHandler,
+    AccountUtils
 } = require('../../utils/index')
 const {
     User,
@@ -34,17 +35,17 @@ class File extends OssFiles{
                 ,new_path = path.resolve(__dirname, `../../public/avatar/${user_id}${ext_name}`)
             fs.rename(old_path,new_path,async ()=> {
                 // let ossResult = await super.upLoadFile(save_file_name,new_path)
-                client.put(`${user_id}${ext_name}`, new_path, {}).then(async ossResult => {
+                client.put(`user/${user_id}${ext_name}`, new_path, {}).then(async ossResult => {
                     await User.update({
                         head_url: ossResult.url
                     }, {
                         where: {
-                            id: user_id
+                            id: AccountUtils.decodeUserId(user_id)
                         }
                     })
                     res.json({
                         data: {
-                            avatar_url: ossResult.url
+                            avatar_url: ossResult.url + '?' + new Date().valueOf()
                         },
                         status: true
                     })
@@ -73,7 +74,7 @@ class File extends OssFiles{
                 ,new_path = path.resolve(__dirname, `../../public/avatar/${team_id}${ext_name}`)
             fs.rename(old_path,new_path,async ()=> {
                 // let ossResult = await super.upLoadFile(save_file_name,new_path)
-                client.put(`${team_id}${ext_name}`, new_path, {}).then(async ossResult => {
+                client.put(`team/${team_id}${ext_name}`, new_path, {}).then(async ossResult => {
                     await Team.update({
                         team_icon: ossResult.url
                     }, {

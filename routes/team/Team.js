@@ -145,7 +145,7 @@ class TeamType {
         delete search_result.dataValues.TeamMember
         team_member = team_member.map(item => {
             return {
-                head_url: item.head_url,
+                head_url: item.head_url + '?' + new Date().valueOf(),
                 id: item.id,
                 role: item.team_member.role,
                 nick_name: item.nick_name,
