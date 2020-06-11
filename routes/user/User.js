@@ -1,12 +1,15 @@
 const {
     ErrorHandler,
     AccountUtils,
-    Jwt
+    Jwt,
+    SmsType
 } = require('../../utils/index')
 const {
     User,
     FriendShip
 } = require('../../model/db/modules/index')
+const sms_conf = require('../../conf/sms/sms')
+const redisDao = require('../../model/redis/redis')
 class UserType {
     constructor() {}
     static _testTokenState (token) {
@@ -16,6 +19,12 @@ class UserType {
             if (!tokenAvailable.state) reject(false)
             else reslove(true)
         })
+    }
+    static async _checkVerificationCodeState (telephone, verification_code) {
+        telephone = "+86" + telephone
+        const redis_verification_code = await redisDao.getValue(telephone)
+        if (!redis_verification_code || redis_verification_code != verification_code) return false
+        else return true
     }
     async login(req, res) {
         let {
@@ -60,6 +69,10 @@ class UserType {
         } = req.body
         if (!telephone || !password || !verification_code) {
             ErrorHandler.handleParamsError(res)
+            return
+        }
+        if (!await UserType._checkVerificationCodeState(telephone, verification_code)) {
+            ErrorHandler.handleParamsError(res, '验证码输入有误')
             return
         }
         let isTelephoneAvailable = await User.findOne({
@@ -189,7 +202,54 @@ class UserType {
         })        
     }
     async getVerificationCode(req, res) {
-        res.end()
+        let {
+            telephone
+        } = req.query
+        if (!telephone) ErrorHandler.handleParamsError(res, '输入参数有误', 500)
+        let is_register = await User.findOne({
+            where: {
+                telephone: telephone
+            }
+        })
+        if (is_register) {
+            res.json({
+                data: {
+                    err_msg: '该手机号已注册'
+                },
+                status: false
+            })
+            res.end();
+            return
+        }
+        telephone = '+86' + telephone
+        let value = await redisDao.getValue(telephone)
+        let is_send = value != null
+        if (is_send) {
+            res.json({
+                msg: '验证码未失效',
+                status: false
+            })
+            res.end()
+            return
+        }
+        let template_id = sms_conf.template_id.register
+        new SmsType().sendSms(template_id, telephone).then(sms_res => {
+            // 发送成功
+            global.redis_client.set(telephone, sms_res.verification_code)
+            global.redis_client.expire(telephone, sms_conf.max_time)
+            res.json({
+                msg: '验证码发送成功',
+                status: true
+            })
+            res.end()
+        }).catch(err => {
+            // 发送失败
+            res.json({
+                msg: '验证码发送失败,请稍后重试',
+                status: false
+            })
+            res.end()
+        })
     }
     async getUserFriendShip (req, res) {
         let {

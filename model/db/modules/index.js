@@ -16,6 +16,8 @@ const TeamActivityMember = sequelizeInstance.import('./teamActivityMemberModel')
 const Match = sequelizeInstance.import('./matchModel')
 // 赛事关系表
 const MatchMember = sequelizeInstance.import('./matchMemberModel')
+// 短信发送
+const Sms = sequelizeInstance.import('./smsModel')
 // n : m
 User.belongsToMany(Team, {
     through: TeamMember, 
@@ -80,3 +82,4 @@ exports.TeamMember = TeamMember
 exports.TeamActivity = TeamActivity
 exports.TeamActivityMember = TeamActivityMember
 exports.Match = Match
+exports.Sms = Sms

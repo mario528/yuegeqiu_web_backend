@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const {
     ErrorHandler,
     Jwt,
@@ -511,6 +512,63 @@ class TeamType {
         res.json({
             data: {},
             status: true
+        })
+    }
+    async getTeamChat (req,res) {
+        let {
+            user_id,
+            team_id
+        } = req.body
+        if (!team_id) ErrorHandler.handleParamsError(res)
+        // 查询 mongodb 
+        const TeamChat = mongoose.model('TeamChat')
+        let result = await TeamChat.find({
+            team_id: team_id
+        }, 'date content publish_id team_id publish_icon_url publish_nick_name').limit(20)
+        result = result.map(item => {
+            delete item._doc._id
+            return {
+                ...item._doc,
+                is_self: item.publish_id == user_id
+            }
+        })
+        res.json({
+            data: {
+                message_list: result
+            },
+            status: true
+        })
+    }
+    async sendTeamChat (req, res) {
+        let {
+            user_id,
+            team_id,
+            content
+        } = req.body
+        if (!user_id || !team_id) ErrorHandler.handleParamsError(res)
+        // 查询 mongodb 
+        const TeamChat = mongoose.model('TeamChat')
+        let { head_url, nick_name } = await User.findOne({
+            id: user_id
+        })
+        const chat = new TeamChat({
+            publish_id: user_id,
+            team_id: team_id,
+            content: content,
+            publish_icon_url: head_url,
+            publish_nick_name: nick_name
+        })
+        chat.save((err, success_res) => {
+            if (err) {
+                res.json({
+                    msg: '发送失败',
+                    status: false
+                })
+            }
+            res.json({
+                msg: '发送成功',
+                status: true
+            })
         })
     }
 }

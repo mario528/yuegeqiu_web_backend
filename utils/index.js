@@ -1,5 +1,5 @@
 exports.ErrorHandler = require('./errorHandle')
 exports.AccountUtils = require('./accountUtils')
 exports.Jwt = require('./jwt')
-exports.Sms = require('./Sms')
+exports.SmsType = require('./sms')
 exports.TimeFormat = require('./time')

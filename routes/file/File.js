@@ -35,7 +35,7 @@ class File extends OssFiles{
                 ,new_path = path.resolve(__dirname, `../../public/avatar/${user_id}${ext_name}`)
             fs.rename(old_path,new_path,async ()=> {
                 // let ossResult = await super.upLoadFile(save_file_name,new_path)
-                client.put(`user/${user_id}${ext_name}`, new_path, {}).then(async ossResult => {
+                client.put(`${req.hostname == 'localhost' ? '/user/' : '/user/production/'}${user_id}${ext_name}`, new_path, {}).then(async ossResult => {
                     await User.update({
                         head_url: ossResult.url
                     }, {
@@ -74,7 +74,7 @@ class File extends OssFiles{
                 ,new_path = path.resolve(__dirname, `../../public/avatar/${team_id}${ext_name}`)
             fs.rename(old_path,new_path,async ()=> {
                 // let ossResult = await super.upLoadFile(save_file_name,new_path)
-                client.put(`team/${team_id}${ext_name}`, new_path, {}).then(async ossResult => {
+                client.put(`${req.hostname == 'localhost' ? '/team/' : '/team/production/'}${team_id}${ext_name}`, new_path, {}).then(async ossResult => {
                     await Team.update({
                         team_icon: ossResult.url
                     }, {

@@ -2,8 +2,10 @@ let express = require('express')
 let path = require('path')
 let bodyParser = require('body-parser')
 let cookieParser = require('cookie-parser')
+let mongoose = require('mongoose')
 let routeDecorate = require('./routes/index')
 let redis_conf = require('./conf/redis/redisConfig')
+let mongo_db_conf = require('./conf/mongodb/mongodb')
 let app = express()
 let http = require('http').createServer(app)
 let socket_io = require('socket.io')(http)
@@ -11,6 +13,16 @@ let cache = require('./model/Cache/cache')
 let { AccountUtils } = require('./utils/index')
 // gloabl redis_client
 global.redis_client = require('redis').createClient(redis_conf)
+// connect mongodb
+mongoose.connect(mongo_db_conf.mongo_db_path)
+const db = mongoose.connection
+db.on('error',() => {
+    console.log("mongodb database connect error")
+}) 
+db.once('open', () => {
+    console.log("mongodb database connect successful")
+})
+require('./model/Mongodb/dao')
 // add app middleWare
 app.use(bodyParser.urlencoded({
     extended: true
@@ -34,7 +46,7 @@ routeDecorate(app)
 const server = http.listen(3000, () => {
     console.log("Now Node.js server is running")
 })
-global.online_number = 220
+global.online_number = Math.floor(Math.random()*100)
 socket_io.on('connection', (socket) => {
     console.log("创建socket连接")
     global.online_number = ++ global.online_number

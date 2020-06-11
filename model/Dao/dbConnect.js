@@ -12,6 +12,7 @@ let sequelizeInstance = new Sequelize(conf.database, conf.user, conf.password, {
     ialectOptions: {
         useUTC: false //for reading from database
     },
-    timezone: '+08:00'
+    timezone: '+08:00',
+    logging: false
 })
 module.exports = sequelizeInstance

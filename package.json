@@ -27,11 +27,16 @@
     "express": "^4.17.1",
     "formidable": "^1.2.2",
     "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.18",
     "mysql": "^2.18.1",
     "mysql2": "^2.1.0",
     "querystring": "^0.2.0",
     "redis": "^3.0.2",
     "sequelize": "^5.21.6",
     "socket.io": "^2.3.0"
+  },
+  "dependencies": {
+    "sequelize-cli": "^5.5.1",
+    "tencentcloud-sdk-nodejs": "^3.0.185"
   }
 }
