@@ -1,6 +1,5 @@
 module.exports = {
-    secret_id: 'AKIDcoqQAedqappaSZN2PnwqUL4XjfH6umgl',
-    secret_key: 'ygAsLYWMwJfvxlKelriIdj7O7upUt773',
+    
     template_id: {
         register:  '631029',
         login: '631028',

@@ -1,6 +1,7 @@
 /node_modules
 /conf/mysql/mysql.js
 /conf/oss/oss.js
+/conf/sms/sms.js
 /pem/*
 /public/avatar/*
 /public/note
