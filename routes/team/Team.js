@@ -558,17 +558,34 @@ class TeamType {
             publish_icon_url: head_url,
             publish_nick_name: nick_name
         })
-        chat.save((err, success_res) => {
+        chat.save(async (err, success_res) => {
             if (err) {
                 res.json({
                     msg: '发送失败',
                     status: false
                 })
+                res.end()
+            }else {
+                // await global.$socket_io.broadcast.to('mario').emit('receiveMsg', {
+                //     publish_id: user_id,
+                //     team_id: team_id,
+                //     content: content,
+                //     publish_icon_url: head_url,
+                //     publish_nick_name: nick_name
+                // })
+                global.$socket_io.sockets.in('mario').emit('receiveMsg', {
+                    publish_id: user_id,
+                    team_id: team_id,
+                    content: content,
+                    publish_icon_url: head_url,
+                    publish_nick_name: nick_name
+                })
+                res.json({
+                    msg: '发送成功',
+                    status: true
+                })
+                res.end()
             }
-            res.json({
-                msg: '发送成功',
-                status: true
-            })
         })
     }
 }

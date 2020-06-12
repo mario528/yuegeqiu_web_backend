@@ -42,24 +42,37 @@ app.use(function(req, res, next) {
 })
 
 routeDecorate(app)
-
 const server = http.listen(3000, () => {
     console.log("Now Node.js server is running")
 })
 global.online_number = Math.floor(Math.random()*100)
-socket_io.on('connection', (socket) => {
+// websocket 
+// socket_io.sockets.emit 所有用户
+// socket_io.sockets.socket(socket_id).emit 给指定客户端发送消息
+// join 加入分组 leave 离开分组 订阅模式
+// socket_client.broadcast.to(group_name).emit 分组内广播
+// socket_io.sockets.in(group_name).emit 分组内除自己外广播
+socket_io.on('connection', (socket_client) => {
     console.log("创建socket连接")
     global.online_number = ++ global.online_number
-    global.$socket = socket
-    socket.broadcast.emit('onlineNumber', {
+    global.$socket = socket_client
+    global.$socket_io = socket_io
+    socket_io.sockets.emit('onlineNumber', {
         online_number: global.online_number
     })
-    socket.on('event', data => { /* … */ });
-    socket.on('disconnect', () => { 
+    // 加入球队聊天室
+    socket_client.on('connectTeamChat', data => {
+        socket_client.join('mario')
+    })
+    // 离开球队聊天室
+    socket_client.on('disconnectTeamChat', data => {
+        socket_client.leave('mario')
+    })
+    socket_client.on('disconnect', () => { 
        global.online_number = -- global.online_number
-       socket.broadcast.emit('onlineNumber', {
-         online_number: global.online_number
-       })
-       console.log("断开连接")
+       socket_io.sockets.emit('onlineNumber', {
+        online_number: global.online_number
+      })
+      console.log("断开连接")
     });
  })
