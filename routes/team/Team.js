@@ -2,16 +2,16 @@ const mongoose = require('mongoose')
 const {
     ErrorHandler,
     Jwt,
-    TimeFormat
+    TimeFormat,
+    AccountUtils
 } = require('../../utils/index')
 const {
     User,
     Team,
     TeamMember,
     TeamActivity,
-    TeamActivityMember,
     Match,
-    MatchMember
+    TeamMessageBoard
 } = require('../../model/db/modules/index')
 let sequelizeInstance = require('../../model/Dao/dbConnect')
 const sequelize = require('sequelize');
@@ -566,19 +566,13 @@ class TeamType {
                 })
                 res.end()
             }else {
-                // await global.$socket_io.broadcast.to('mario').emit('receiveMsg', {
-                //     publish_id: user_id,
-                //     team_id: team_id,
-                //     content: content,
-                //     publish_icon_url: head_url,
-                //     publish_nick_name: nick_name
-                // })
-                global.$socket_io.sockets.in('mario').emit('receiveMsg', {
+                global.$socket_io.sockets.in(`teamId${team_id}`).emit('receiveMsg', {
                     publish_id: user_id,
                     team_id: team_id,
                     content: content,
                     publish_icon_url: head_url,
-                    publish_nick_name: nick_name
+                    publish_nick_name: nick_name,
+                    publish_id_encode: AccountUtils.cryptoUserId(user_id),
                 })
                 res.json({
                     msg: '发送成功',
@@ -587,6 +581,89 @@ class TeamType {
                 res.end()
             }
         })
+    }
+    async getTeamMessageBoard (req, res) {
+        const PAGE_SIZE = 5;
+        let data_list = []
+        let { 
+            team_id,
+            user_id,
+            sort_type,
+            page
+        } = req.body
+        if (!team_id || page == -1) ErrorHandler.handleParamsError(res)
+        // 一个成员在球队留言板可发送n条
+        // 每个球队可以有n个留言
+        const offset = PAGE_SIZE * page
+        let team_message_board = await TeamMessageBoard.findAndCountAll({
+            rows: true,
+            where: {
+                team_id: team_id
+            },
+            offset,
+            limit: PAGE_SIZE,
+            include: [
+                {
+                    model: User,
+                    as: 'user_info',
+                    attributes: ['nick_name', 'head_url']
+                },
+                {
+                    model: TeamMember,
+                    as: 'team_role',
+                    attributes: ['role']
+                }
+            ]
+        })
+        if ( user_id ) {
+            data_list = team_message_board.rows.map(item => {
+                item.is_self = +user_id == item.user_id
+                return item
+            })
+        }
+        res.json({
+            status: true,
+            data: {
+                message_board_info: {
+                    list: data_list,
+                    count: team_message_board.count,
+                }
+            }
+        })
+        res.end()
+    }
+    async sendTeamMessageBoard (req, res) {
+        let {
+            team_id,
+            user_id,
+            content
+        } = req.body
+        if (!team_id || !content || !user_id) ErrorHandler.handleParamsError(res)
+        let is_join = await TeamMember.findOne({
+            where: {
+                team_id: team_id,
+                user_id: user_id
+            }
+        })
+        if (is_join) {
+            await TeamMessageBoard.create({
+                team_id: team_id,
+                user_id: user_id,
+                content: content,
+                publish_date: new TimeFormat().formateTime('YYYY-MM-DD HH:MM:SS'),
+            })
+            res.json({
+                status: true
+            })
+            res.end()
+        }else {
+            res.json({
+                status: false,
+                msg: '发布留言需加入球队'
+            })
+            res.end()
+        }
+        
     }
 }
 module.exports = new TeamType()

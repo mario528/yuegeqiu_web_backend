@@ -62,11 +62,11 @@ socket_io.on('connection', (socket_client) => {
     })
     // 加入球队聊天室
     socket_client.on('connectTeamChat', data => {
-        socket_client.join('mario')
+        socket_client.join(`teamId${data.team_id}`)
     })
     // 离开球队聊天室
     socket_client.on('disconnectTeamChat', data => {
-        socket_client.leave('mario')
+        socket_client.leave(`teamId${data.team_id}`)
     })
     socket_client.on('disconnect', () => { 
        global.online_number = -- global.online_number

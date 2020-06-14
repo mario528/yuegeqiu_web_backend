@@ -18,6 +18,8 @@ const Match = sequelizeInstance.import('./matchModel')
 const MatchMember = sequelizeInstance.import('./matchMemberModel')
 // 短信发送
 const Sms = sequelizeInstance.import('./smsModel')
+// 球队留言板
+const TeamMessageBoard = sequelizeInstance.import('./teamMessageBoardModel')
 // n : m
 User.belongsToMany(Team, {
     through: TeamMember, 
@@ -31,8 +33,18 @@ Team.belongsToMany(User, {
     foreignKey: 'team_id',
     constraints: false
 })
-// n : 1
-Team.hasMany(TeamActivity)
+
+TeamMessageBoard.belongsTo(User, {
+    foreignKey: 'user_id',
+    target: 'id',
+    as: 'user_info'
+})
+TeamMessageBoard.belongsTo(TeamMember, {
+    foreignKey: 'user_id',
+    target: 'user_id',
+    as: 'team_role'
+})
+
 
 User.belongsToMany(TeamActivity, {
     through: TeamActivityMember, 
@@ -83,3 +95,4 @@ exports.TeamActivity = TeamActivity
 exports.TeamActivityMember = TeamActivityMember
 exports.Match = Match
 exports.Sms = Sms
+exports.TeamMessageBoard = TeamMessageBoard
