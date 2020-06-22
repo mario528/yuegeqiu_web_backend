@@ -59,9 +59,12 @@ class MatchType {
             match_detail,
             match_type,
             match_property,
+            match_address,
+            longitude,
+            latitude,
             team_id
         } = req.body
-        if (!user_id || !match_name || !start_time || !end_time || max_team_number <= 0) {
+        if (!user_id || !match_name || !start_time || !end_time || max_team_number <= 0 || !match_address) {
             ErrorHandler.handleParamsError()
             return;
         }
@@ -77,7 +80,10 @@ class MatchType {
                 match_detail: match_detail,
                 match_province: location_info.province,
                 match_city: location_info.city,
-                match_district: location_info.district
+                match_district: location_info.district,
+                match_address: match_address,
+                longitude: longitude,
+                latitude: latitude
             }),
             Team.findOne({
                 where: {
@@ -94,6 +100,60 @@ class MatchType {
                 data: {},
                 status: true,
                 msg: '赛事创建成功'
+            })
+            res.end()
+        })
+    }
+    async createChallenge (req, res) {
+        let {
+            user_id,
+            team_id,
+            time,
+            longitude,
+            latitude,
+            type,
+            detail,
+            be_challenged_team_id,
+            address
+        } = req.body
+        if (!user_id || !team_id || !time || !longitude || !latitude || !be_challenged_team_id) ErrorHandler.handleParamsError(res)
+        Promise.all([
+            Match.create({
+                creat_id: user_id,
+                match_name: '约球',
+                match_property: 0,
+                match_type: type,
+                start_time: time,
+                end_time: time,
+                max_team_number: 2,
+                match_detail: detail,
+                match_court_location: address,
+                is_challenge: 1,
+                longitude: longitude,
+                latitude: latitude
+            }),
+            Team.findOne({
+                where: {
+                    id: team_id
+                }
+            }),
+            Team.findOne({
+                where: {
+                    id: be_challenged_team_id
+                }
+            })
+        ]).then(async search_result => {
+            let match = search_result[0], 
+                invite_team = search_result[1],
+                be_invite_team = search_result[2]
+            await match.addMatchMember(invite_team)
+            await match.addMatchMember(be_invite_team, {
+                through: {
+                    state: 1
+                }
+            })
+            res.json({
+                status: true
             })
             res.end()
         })

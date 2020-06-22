@@ -36,6 +36,14 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.DATE,
             allowNull: false
         },
+        longitude: {
+            type: DataTypes.DOUBLE(10,6),
+            allowNull: false,
+        },
+        latitude: {
+            type: DataTypes.DOUBLE(10,6),
+            allowNull: false,
+        },
         max_team_number: {
             type: DataTypes.BIGINT(30),
             allowNull: true,
@@ -48,7 +56,12 @@ module.exports = function (sequelize, DataTypes) {
         },
         match_province: DataTypes.STRING,
         match_city: DataTypes.STRING,
-        match_district: DataTypes.STRING
+        match_district: DataTypes.STRING,
+        is_challenge: {
+            type: DataTypes.BIGINT(11),
+            defaultValue: 0,
+            comment: '0: 普通赛事 1: 约个球',
+        }
     }, {
         timestamps: false,
         tableName: 'match',

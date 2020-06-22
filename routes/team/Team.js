@@ -665,5 +665,36 @@ class TeamType {
         }
         
     }
+    async getUserTeamList (req, res) {
+        let {
+            user_id,
+        } = req.query
+        if (!user_id) ErrorHandler.handleParamsError(res)
+        // TODO 问题： 应忽略中间表
+        let search_result = await Team.findAll({
+            attributes: ['team_name', 'team_icon', 'id'],
+            include: [{
+                model: User,
+                as: 'TeamMember',
+                where: {
+                    id: user_id
+                }
+            }]
+        })
+        let team_list = search_result.map(item => {
+            return {
+                id: item.id,
+                team_name: item.team_name,
+                team_icon: item.team_icon
+            }
+        })
+        res.json({
+            status: true,
+            data: {
+                team_list: team_list
+            }
+        })
+        res.end()
+    }
 }
 module.exports = new TeamType()

@@ -20,4 +20,5 @@ router.post('/v1/team/chat', teamType.getTeamChat)
 router.post('/v1/team/chat/send', teamType.sendTeamChat)
 router.post('/v1/team/board/get', teamType.getTeamMessageBoard)
 router.post('/v1/team/board/send', teamType.sendTeamMessageBoard)
+router.get('/v1/team/user/list', teamType.getUserTeamList)
 module.exports = router

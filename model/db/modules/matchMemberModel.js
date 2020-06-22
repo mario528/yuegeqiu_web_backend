@@ -6,6 +6,11 @@ module.exports = function (sequelize, DataTypes) {
             allowNull: true,
             unique: true,
             autoIncrement: true
+        },
+        state: {
+            type: DataTypes.BIGINT(30),
+            defaultValue: 0,
+            comment: '0: 待确认 1: 确认'
         }
     }, {
         timestamps: false,
