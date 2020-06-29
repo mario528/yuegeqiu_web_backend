@@ -16,6 +16,7 @@ const {
 let sequelizeInstance = require('../../model/Dao/dbConnect')
 const sequelize = require('sequelize');
 const Op = sequelize.Op
+// const { team_formation_setting } = require('../../conf/baseConf/index')
 class TeamType {
     constructor() {}
     static _getTeamActivity(team_id, start_at, end_at) {
@@ -670,29 +671,52 @@ class TeamType {
             user_id,
         } = req.query
         if (!user_id) ErrorHandler.handleParamsError(res)
+        let query_string = `SELECT t.id, team_name, team_icon FROM team as t
+        INNER JOIN team_member as tm
+        ON tm.user_id = ${user_id} AND tm.team_id = t.id AND tm.role <> 2;`
         // TODO 问题： 应忽略中间表
-        let search_result = await Team.findAll({
-            attributes: ['team_name', 'team_icon', 'id'],
-            include: [{
-                model: User,
-                as: 'TeamMember',
-                where: {
-                    id: user_id
-                }
-            }]
-        })
-        let team_list = search_result.map(item => {
-            return {
-                id: item.id,
-                team_name: item.team_name,
-                team_icon: item.team_icon
-            }
-        })
+        let team_list = await sequelizeInstance.query(query_string)
         res.json({
             status: true,
             data: {
-                team_list: team_list
+                team_list: team_list[0]
             }
+        })
+        res.end()
+    }
+    async getTeamFormationInfo (req, res) {
+        let {
+            user_id,
+            team_id
+        } = req.body
+        let team_info = await Team.findOne({
+            where: {
+                id: team_id
+            }
+        })
+        let query_string = `SELECT user.id, user.nick_name, user.head_url,role FROM team_member 
+        INNER JOIN user ON
+        user.id = team_member.user_id
+        AND
+        team_member.team_id = ${team_id}`
+        let team_list = await sequelizeInstance.query(query_string)
+        let is_member = false
+        if (user_id) {
+            is_member = await TeamMember.findOne({
+                where: {
+                    team_id: team_id,
+                    user_id: user_id
+                }
+            }).length != 0
+        }
+        res.json({
+            data: {
+                team_info: team_info,
+                team_list: team_list[0],
+                is_member: is_member,
+                team_formation_setting: require('../../conf/baseConf/index').team_formation_setting
+            },
+            status: true
         })
         res.end()
     }
