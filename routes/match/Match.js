@@ -9,8 +9,14 @@ const {
     TeamMember,
     TeamActivity,
     TeamActivityMember,
-    Match
+    Match,
+    Inform,
+    InformMember
 } = require('../../model/db/modules/index')
+const {
+    getChallengeInform
+} = require('../../conf/copywriting/index')
+const Op = require('sequelize').Op
 class MatchType {
     constructor() {}
     async getCreateMatchDetail(req, res) {
@@ -152,6 +158,29 @@ class MatchType {
                     state: 1
                 }
             })
+            // 添加邀请通知
+            let inform_content = getChallengeInform(invite_team.team_name,be_invite_team.team_name,new TimeFormat(new Date(new Date(time).valueOf())).formateTime('YYYY-MM-DD'), address)
+            let inform_result = await Inform.create({
+                inform_type: 1,
+                inform_content: inform_content,
+                publist_time: new Date(),
+                expire_time: time
+            })
+            let team_mamber_manage = await TeamMember.findAll({
+                where: {
+                    team_id: be_challenged_team_id,
+                    role: {
+                        [Op.in]: [0,1]
+                    }
+                }
+            })
+            let params = team_mamber_manage.map(item => {
+                return {
+                    inform_id: inform_result.id,
+                    inform_user_id: item.user_id
+                }
+            })
+            await InformMember.bulkCreate(params)
             res.json({
                 status: true
             })

@@ -2,14 +2,18 @@ const {
     ErrorHandler,
     AccountUtils,
     Jwt,
-    SmsType
+    SmsType,
+    TimeFormat
 } = require('../../utils/index')
 const {
     User,
-    FriendShip
+    FriendShip,
+    Inform,
+    InformMember
 } = require('../../model/db/modules/index')
 const sms_conf = require('../../conf/sms/sms')
 const redisDao = require('../../model/redis/redis')
+let sequelizeInstance = require('../../model/Dao/dbConnect')
 class UserType {
     constructor() {}
     static _testTokenState (token) {
@@ -156,10 +160,16 @@ class UserType {
                     id: user_id
                 }
             })
+            let time = new TimeFormat().formateTime('YYYY-MM-DD')
+            let query_string = `SELECT COUNT(*) as inform_count FROM inform_member
+            INNER JOIN inform ON
+            inform_user_id = ${user_id} AND is_read = 0 AND expire_time >= ${time};`
+            let inform_count = await sequelizeInstance.query(query_string)
             res.json({
                 status: true,
                 data: {
-                    user_info: searchResult
+                    user_info: searchResult,
+                    inform_count: inform_count[0][0].inform_count
                 }
             })
             res.end()
