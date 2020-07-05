@@ -387,5 +387,29 @@ class UserType {
         })
         res.end()
     }
+    async getUserMessage (req, res) {
+        const PAGE_SIZE = 10
+        let {
+            user_id,
+            next_page
+        } = req.query
+        if (!user_id || next_page == -1) {
+            ErrorHandler.handleParamsError(res)
+            return
+        }
+        let query_string = `SELECT inform.id,inform_content FROM inform
+        INNER JOIN inform_member ON
+        inform_user_id = ${user_id} AND is_read = 0 AND expire_time >= ${new TimeFormat().formateTime('YYYY-MM-DD')} LIMIT ${next_page * PAGE_SIZE}, ${PAGE_SIZE}; 
+        SELECT found_rows();`
+        let inform_count = await sequelizeInstance.query(query_string)
+        debugger
+        res.json({
+            status: true,
+            data: {
+                inform_count: inform_count[0][0].inform_count
+            }
+        })
+        res.end()
+    }
 }
 module.exports = new UserType()
