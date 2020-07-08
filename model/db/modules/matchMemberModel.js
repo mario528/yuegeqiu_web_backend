@@ -10,7 +10,7 @@ module.exports = function (sequelize, DataTypes) {
         state: {
             type: DataTypes.BIGINT(30),
             defaultValue: 0,
-            comment: '0: 待确认 1: 确认'
+            comment: '0: 待确认 1: 确认 2: 拒绝'
         }
     }, {
         timestamps: false,

@@ -15,4 +15,6 @@ router.post('/v1/user/friend/detail', userType.getUserFriendShipDetail)
 router.post('/v1/user/info/get', userType.getUserInfoByUpdate)
 router.post('/v1/user/info/update', userType.updateUserInfo)
 router.get('/v1/user/message', userType.getUserMessage)
+router.get('/v1/user/inform/detail', userType.getInformDetail)
+router.get('/v1/user/inform/update', userType.updateInformState)
 module.exports = router

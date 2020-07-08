@@ -164,7 +164,8 @@ class MatchType {
                 inform_type: 1,
                 inform_content: inform_content,
                 publist_time: new Date(),
-                expire_time: time
+                expire_time: time,
+                match_id: match.id
             })
             let team_mamber_manage = await TeamMember.findAll({
                 where: {

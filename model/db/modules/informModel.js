@@ -24,10 +24,13 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.DATE,
             allowNull: true
         },
-        is_read: {
-            type: DataTypes.BIGINT(5),
-            defaultValue: 0,
-            comment: '0: 未读 1: 已读',
+        match_id: {
+            type: DataTypes.BIGINT(30),
+            comment: '比赛挑战关联比赛id',
+        },
+        activity_id: {
+            type: DataTypes.BIGINT(30),
+            comment: '活动 关联活动id',
         }
     }, {
         timestamps: false,

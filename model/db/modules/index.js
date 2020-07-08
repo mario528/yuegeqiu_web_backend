@@ -90,11 +90,11 @@ Team.belongsToMany(Match, {
 })
 
 Inform.hasMany(InformMember, {
-    foreignKey: 'inform_user_id',
+    foreignKey: 'inform_id',
     as: 'inform_member'
 })
 InformMember.belongsTo(Inform, {
-    foreignKey: 'inform_user_id',
+    foreignKey: 'inform_id',
     as: 'inform_member'
 })
 
@@ -111,3 +111,4 @@ exports.Sms = Sms
 exports.TeamMessageBoard = TeamMessageBoard
 exports.Inform = Inform
 exports.InformMember = InformMember
+exports.MatchMember = MatchMember

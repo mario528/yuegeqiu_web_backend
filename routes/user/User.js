@@ -9,11 +9,15 @@ const {
     User,
     FriendShip,
     Inform,
-    InformMember
+    InformMember,
+    Match,
+    MatchMember
 } = require('../../model/db/modules/index')
 const sms_conf = require('../../conf/sms/sms')
 const redisDao = require('../../model/redis/redis')
 let sequelizeInstance = require('../../model/Dao/dbConnect')
+const sequelize = require('sequelize')
+const Op = require('sequelize').Op
 class UserType {
     constructor() {}
     static _testTokenState (token) {
@@ -388,28 +392,129 @@ class UserType {
         res.end()
     }
     async getUserMessage (req, res) {
-        const PAGE_SIZE = 10
         let {
             user_id,
-            next_page
+            page
         } = req.query
-        if (!user_id || next_page == -1) {
+        if (!user_id || page == -1) {
             ErrorHandler.handleParamsError(res)
             return
         }
-        let query_string = `SELECT inform.id,inform_content FROM inform
-        INNER JOIN inform_member ON
-        inform_user_id = ${user_id} AND is_read = 0 AND expire_time >= ${new TimeFormat().formateTime('YYYY-MM-DD')} LIMIT ${next_page * PAGE_SIZE}, ${PAGE_SIZE}; 
-        SELECT found_rows();`
-        let inform_count = await sequelizeInstance.query(query_string)
-        debugger
+        const PAGE_SIZE = 10
+        const offset = page * PAGE_SIZE
+        let search_result = await Inform.findAndCountAll({
+            attributes: ['inform_content', 'id'],
+            where: {
+                expire_time: {
+                    [Op.gte]: new TimeFormat().formateTime('YYYY-MM-DD')
+                }
+            },
+            offset,
+            limit: PAGE_SIZE,
+            include: [{
+                row: true,
+                attributes: ['is_read'],
+                model: InformMember,
+                as: 'inform_member',
+                where: {
+                    inform_user_id: user_id
+                }
+            }],
+        })
+        const next_page = search_result.count - (page + 1) * PAGE_SIZE > 0 ? ++page : -1
+        let inform_list = search_result.rows.map((item) => {
+            return {
+                id: item.id,
+                inform_content: item.inform_content,
+                is_read: item.inform_member[0].is_read
+            }
+        })
         res.json({
             status: true,
             data: {
-                inform_count: inform_count[0][0].inform_count
+                inform_count: search_result.count,
+                inform: inform_list,
+                next_page: next_page
             }
         })
         res.end()
+    }
+    async getInformDetail (req,res) {
+        let {
+            user_id,
+            inform_id
+        } = req.query
+        if (!user_id || !inform_id) {
+            ErrorHandler.handleParamsError(res)
+            return
+        }
+        let match_member = []
+        let inform_detail = await Inform.findOne({
+            attributes: ['id', 'inform_type', 'match_id', 'inform_content', 'expire_time'],
+            where: {
+                id: inform_id
+            },
+            include: [{
+                row: true,
+                attributes: ['is_read'],
+                model: InformMember,
+                as: 'inform_member',
+                where: {
+                    inform_user_id: user_id
+                }
+            }],
+        })
+        inform_detail.expire_time = new TimeFormat(inform_detail.expire_time).valueOf().formateTime('YYYY-MM-DD')
+        if (inform_detail.inform_member[0].is_read == 0 ) {
+            // 已读
+            await InformMember.update({
+                is_read: 1
+            }, {
+                where: {
+                    inform_id: inform_id
+                }
+            })
+        }
+        if (inform_detail.inform_type == 1) {
+            // 约球挑战
+            let query_string = `
+            SELECT team.id, team_name, team_icon FROM team
+            INNER JOIN match_member ON
+            match_id = ${inform_detail.match_id} AND team_id = team.id;
+            `
+            match_member = await sequelizeInstance.query(query_string)
+        }
+        res.json({
+            status: true,
+            data: {
+                inform_detail: inform_detail,
+                team_info: match_member[0]
+            }
+        })
+        res.json()
+    }
+    async updateInformState (req, res) {
+        let {
+            user_id,
+            inform_id,
+            state
+        } = req.query
+        if (!user_id || !inform_id || state == undefined) {
+            ErrorHandler.handleParamsError(res)
+            return
+        }
+        let seach_query = `
+            UPDATE inform JOIN match_member ON
+            inform.match_id = match_member.match_id
+            AND inform.id = ${inform_id}
+            SET state = ${state ? 1 : 2}
+        `
+        const result = await sequelizeInstance.query(seach_query)
+        // 给两个球队所有成员发送消息
+        // TODO is_read 字段应该在inform_member表定义
+        res.json({
+            status: true
+        })
     }
 }
 module.exports = new UserType()
