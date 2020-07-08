@@ -516,5 +516,24 @@ class UserType {
             status: true
         })
     }
+    async readAllInform (req, res) {
+        let {
+            user_id
+        } = req.query
+        if (!user_id) {
+            ErrorHandler.handleParamsError(res)
+            return
+        }
+        await InformMember.update({
+            is_read: 1
+        }, {
+            where: {
+                inform_user_id: user_id
+            }
+        })
+        res.json({
+            status: true
+        })
+    }
 }
 module.exports = new UserType()

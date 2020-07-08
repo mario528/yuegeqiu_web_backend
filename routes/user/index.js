@@ -17,4 +17,5 @@ router.post('/v1/user/info/update', userType.updateUserInfo)
 router.get('/v1/user/message', userType.getUserMessage)
 router.get('/v1/user/inform/detail', userType.getInformDetail)
 router.get('/v1/user/inform/update', userType.updateInformState)
+router.get('/v1/user/inform/read/all', userType.readAllInform)
 module.exports = router
